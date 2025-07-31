@@ -6,6 +6,7 @@ import fetch from 'node-fetch';
 import { ensureJavaRuntime } from './java-manager.js';
 import { ensureForgeInstaller, startGame, syncMods } from './launcher.js';
 import { updateElectronApp } from 'update-electron-app';
+import RPC from 'discord-rpc';
 if (require('electron-squirrel-startup')) {
     app.quit();
 }
@@ -25,6 +26,85 @@ const HATCHUP_CREATE_PROFILE = {
     forgeInstallerName: "forge-installer.jar",
     forgeInstallerUrl: "https://map.hatchup.ru/downloads/create/forge-installer.jar"
 };
+
+
+const clientId = '1400609868129374328';
+const rpc = new RPC.Client({ transport: 'ipc' });
+
+let rpcReady = false;
+let inGame = false;
+let onlinePlayers = 0;
+let maxPlayers = 0;
+let activityStartTime;
+
+function updateRPC() {
+    // Не делаем ничего, если RPC не подключен
+    if (!rpcReady) return;
+    if (!activityStartTime) {
+        activityStartTime = new Date();
+    }
+    let activity;
+
+    if (inGame) {
+        // Статус "В игре"
+        activity = {
+            details: 'Играет на HATCHUP CREATE',
+            state: 'Строит заводы',
+            startTimestamp: activityStartTime,
+            partySize: onlinePlayers,
+            partyMax: maxPlayers,
+            largeImageKey: 'server_logo',
+            largeImageText: 'HATCHUP CREATE',
+            instance: false,
+        };
+    } else {
+        // Статус "В лаунчере"
+        activity = {
+            details: 'Отдыхает в лаунчере',
+            state: 'Готовится к смене на заводе',
+            startTimestamp: activityStartTime,
+            largeImageKey: 'launcher_logo',
+            largeImageText: 'HATCHUP Launcher',
+            instance: false,
+        };
+    }
+
+    rpc.setActivity(activity).catch(console.error);
+}
+function setGameState(newInGameStatus) {
+    if (inGame === newInGameStatus) return;
+
+    inGame = newInGameStatus;
+    activityStartTime = new Date();
+    updateRPC();
+}
+async function connectToDiscord() {
+    try {
+        await rpc.login({ clientId });
+        console.log('Successfully connected to Discord RPC.');
+    } catch (error) {
+        // Ошибка, если Discord не запущен. Повторяем попытку через 20 секунд.
+        console.log('Could not connect to Discord, retrying in 20 seconds...');
+        setTimeout(connectToDiscord, 20000);
+    }
+}
+rpc.on('ready', () => {
+    rpcReady = true;
+    console.log('Discord RPC is ready. Setting initial activity.');
+    setGameState(false);
+    updateRPC(); // Устанавливаем начальный статус
+
+    setInterval(() => {
+        if (inGame) {
+            updateRPC();
+        }
+    }, 15000);
+});
+
+// Запускаем первую попытку подключения
+connectToDiscord();
+
+
 const createLoadingWindow = () => {
     loadingWindow = new BrowserWindow({
         width: 300,
@@ -82,8 +162,13 @@ async function checkServerStatus() {
     try {
         const response = await fetch(apiUrl);
         const serverStatus = await response.json();
-
-        // Отправляем полные данные в окно, даже если сервер оффлайн (API все равно вернет `online: false`)
+        if (serverStatus.online) {
+            onlinePlayers = serverStatus.players.online;
+            maxPlayers = serverStatus.players.max;
+        } else {
+            onlinePlayers = 0;
+            maxPlayers = 0;
+        }
         mainWindow.webContents.send('update-server-status', serverStatus);
     } catch (error) {
         // Если произошла сетевая ошибка, отправляем "пустой" оффлайн-статус
@@ -191,7 +276,7 @@ ipcMain.handle('launch-game', async (event, { nickname }) => {
             nickname: nickname,
             javaPath: javaPath,
             forgeInstallerPath: forgeInstallerPath,
-            rootPath: ROOT_PATH, 
+            rootPath: ROOT_PATH,
             ram: settings.ram,
             window: settings.window,
             fullscreen: settings.fullscreen,
@@ -199,6 +284,13 @@ ipcMain.handle('launch-game', async (event, { nickname }) => {
         };
         await startGame(HATCHUP_CREATE_PROFILE, launchOptions, (progress) => { // <-- ИЗМЕНЕНИЕ
             sendToRenderer('update-status', progress);
+            if (progress.launched) {
+                setGameState(true);
+            }
+
+            if (progress.finished || progress.error) {
+                setGameState(false);
+            }
         });
 
         return { success: true };
