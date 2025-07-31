@@ -26,7 +26,8 @@ module.exports = {
       config: {
         iconUrl: 'https://raw.githubusercontent.com/hatchup-dev/hatchup/refs/heads/main/icon.ico',
         // The ICO file to use as the icon for the generated Setup.exe
-        setupIcon: 'src/assets/icon.ico'
+        setupIcon: 'src/assets/icon.ico',
+        loadingGif: 'src/assets/loading.gif'
       },
     },
     {
@@ -53,16 +54,24 @@ module.exports = {
         mainConfig: './webpack.main.config.js',
         renderer: {
           config: './webpack.renderer.config.js',
-          entryPoints: [
-            {
-              html: './src/index.html',
-              js: './src/renderer.js',
-              name: 'main_window',
-              preload: {
-                js: './src/preload.js',
+          "entryPoints": [
+              {
+                "html": "./src/index.html",
+                "js": "./src/renderer.js",
+                "name": "main_window",
+                "preload": {
+                  "js": "./src/preload.js"
+                }
               },
-            },
-          ],
+              {
+                "html": "./src/loading.html",
+                "js": "./src/loading.js",
+                "name": "loading_window",
+                "preload": {
+                  "js": "./src/loading.preload.js"
+                }
+              }
+            ],
         },
       },
     },

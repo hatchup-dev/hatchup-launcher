@@ -9,7 +9,8 @@ if (require('electron-squirrel-startup')) {
 }
 // Создаем хранилище для настроек
 const store = new Store();
-
+let mainWindow;
+let loadingWindow;
 // Конфигурация нашей сборки
 const HATCHUP_CREATE_PROFILE = {
     name: "HATCHUP CREATE",
@@ -20,13 +21,27 @@ const HATCHUP_CREATE_PROFILE = {
     forgeInstallerName: "forge-installer.jar",
     forgeInstallerUrl: "https://map.hatchup.ru/downloads/create/forge-installer.jar"
 };
-
+const createLoadingWindow = () => {
+    loadingWindow = new BrowserWindow({
+        width: 300,
+        height: 200,
+        frame: false,
+        resizable: false,
+        webPreferences: {
+            // Webpack требует preload для вставки CSS
+            preload: LOADING_WINDOW_PRELOAD_WEBPACK_ENTRY,
+        },
+    });
+    // Используем правильную переменную и loadURL
+    loadingWindow.loadURL(LOADING_WINDOW_WEBPACK_ENTRY);
+};
 const createWindow = () => {
-    const mainWindow = new BrowserWindow({
+     mainWindow = new BrowserWindow({
         width: 1024,
         height: 768,
         minWidth: 900,
         minHeight: 600,
+        show: false,
         resizable: true, // Временно поставим true для удобства отладки
         webPreferences: {
             preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
@@ -43,12 +58,27 @@ const createWindow = () => {
         mainWindow.webContents.openDevTools();
     }
 
-    mainWindow.once('ready-to-show', () => {
-        autoUpdater.checkForUpdatesAndNotify();
+     mainWindow.once('ready-to-show', () => {
+        
     });
 };
-
-app.on('ready', createWindow);
+ipcMain.on('renderer-ready', () => {
+    console.log('Received renderer-ready signal. Showing main window.');
+    if (loadingWindow) {
+        loadingWindow.close();
+        loadingWindow = null;
+    }
+    if (mainWindow) {
+        mainWindow.show();
+        mainWindow.focus();
+        // Запускаем проверку обновлений только после того, как все готово
+        autoUpdater.checkForUpdatesAndNotify();
+    }
+});
+app.on('ready', () => {
+    createLoadingWindow();
+    createWindow();
+});
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {

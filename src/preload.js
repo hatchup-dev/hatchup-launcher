@@ -12,5 +12,6 @@ contextBridge.exposeInMainWorld('api', {
     on: (channel, callback) => {
         ipcRenderer.on(channel, (event, ...args) => callback(...args));
     },
-    openGameFolder: () => ipcRenderer.send('open-game-folder')
+    openGameFolder: () => ipcRenderer.send('open-game-folder'),
+    notifyMainWhenReady: () => ipcRenderer.send('renderer-ready'),
 });

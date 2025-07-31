@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const fullscreenCheckbox = document.getElementById('fullscreen-checkbox');
     const autoconnectCheckbox = document.getElementById('autoconnect-checkbox');
 
-    
+
 
     launcherLogoImg.src = launcherLogoSrc;
     settingsIconImg.src = settingsIconSrc;
@@ -173,4 +173,40 @@ document.addEventListener('DOMContentLoaded', () => {
             progressBar.style.width = '0%';
         }
     });
+    const loadImage = (imgElement) => {
+        return new Promise((resolve, reject) => {
+            // Если src уже присвоен и картинка закэширована, она может быть уже загружена
+            if (imgElement.complete) {
+                return resolve();
+            }
+            imgElement.onload = () => resolve();
+            imgElement.onerror = (err) => reject(err);
+        });
+    };
+
+    // 2. Собираем все асинхронные задачи в один массив промисов
+    const initializationPromises = [
+        loadSettings(), // Ваша асинхронная функция загрузки настроек
+        loadImage(launcherLogoImg),
+        loadImage(settingsIconImg),
+        loadImage(serverLogoImg),
+        loadImage(folderIconImg),
+        loadImage(arrowLeftImg),
+        loadImage(arrowRightImg),
+    ];
+
+    // 3. Ждем, пока ВСЕ задачи завершатся
+    Promise.all(initializationPromises)
+        .then(() => {
+            // Когда все картинки и настройки загружены...
+            console.log('Renderer is fully ready. Notifying main process.');
+            // ...отправляем сигнал в main.js!
+            setTimeout(() => window.api.notifyMainWhenReady(), 2000);
+            
+        })
+        .catch(error => {
+            console.error('Failed to initialize renderer:', error);
+            // Даже если есть ошибка, лучше показать окно, чем оставить вечную загрузку
+            window.api.notifyMainWhenReady();
+        });
 });
