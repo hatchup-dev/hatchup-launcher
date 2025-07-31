@@ -1,7 +1,7 @@
 {
   "name": "hatchup-launcher",
   "productName": "HATCHUP Launcher",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "HATCHUP Minecraft Launcher",
   "main": ".webpack/main",
   "scripts": {
@@ -12,9 +12,9 @@
     "lint": "echo \"No linting configured\""
   },
   "repository": {
-      "type": "git",
-      "url": "https://github.com/hatchup-dev/hatchup-launcher.git"
-    },
+    "type": "git",
+    "url": "https://github.com/hatchup-dev/hatchup-launcher.git"
+  },
   "keywords": [],
   "author": {
     "name": "HATCHUP",
