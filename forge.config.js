@@ -6,11 +6,28 @@ module.exports = {
     asar: true,
     icon: "src/assets/icon"
   },
+  publishers: [
+    {
+      name: '@electron-forge/publisher-github',
+      config: {
+        repository: {
+          owner: 'hatchup-dev',
+          name: 'hatchup-launcher'
+        },
+        prerelease: false,
+        draft: false
+      }
+    }
+  ],
   rebuildConfig: {},
   makers: [
     {
       name: '@electron-forge/maker-squirrel',
-      config: {},
+      config: {
+        iconUrl: 'https://raw.githubusercontent.com/hatchup-dev/hatchup/refs/heads/main/icon.ico',
+        // The ICO file to use as the icon for the generated Setup.exe
+        setupIcon: 'src/assets/icon.ico'
+      },
     },
     {
       name: '@electron-forge/maker-zip',
@@ -23,17 +40,6 @@ module.exports = {
     {
       name: '@electron-forge/maker-rpm',
       config: {},
-    },
-    {
-      "name": "@electron-forge/maker-nsis",
-      "config": {
-        "installerIcon": "src/assets/icon.ico",
-        "uninstallerIcon": "src/assets/icon.ico",
-        "license": "LICENSE.txt",
-        "oneClick": false,
-        "allowToChangeInstallationDirectory": true,
-        "runAsAdmin": false
-      }
     }
   ],
   plugins: [
@@ -72,4 +78,5 @@ module.exports = {
       [FuseV1Options.OnlyLoadAppFromAsar]: true,
     }),
   ],
+
 };

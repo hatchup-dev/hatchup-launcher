@@ -4,7 +4,9 @@ import { autoUpdater } from 'electron-updater';
 import Store from 'electron-store';
 import { ensureJavaRuntime } from './java-manager.js';
 import { ensureForgeInstaller, startGame, syncMods } from './launcher.js';
-
+if (require('electron-squirrel-startup')) {
+  app.quit();
+}
 // Создаем хранилище для настроек
 const store = new Store();
 
@@ -18,6 +20,7 @@ const HATCHUP_CREATE_PROFILE = {
     forgeInstallerName: "forge-installer.jar",
     forgeInstallerUrl: "https://map.hatchup.ru/downloads/create/forge-installer.jar"
 };
+
 const createWindow = () => {
     const mainWindow = new BrowserWindow({
         width: 1024,
@@ -89,7 +92,7 @@ ipcMain.handle('launch-game', async (event, { nickname }) => {
         });
 
         sendToRenderer('update-status', { text: 'Запуск игры...' });
-         const launchOptions = {
+        const launchOptions = {
             nickname: nickname,
             javaPath: javaPath,
             forgeInstallerPath: forgeInstallerPath,

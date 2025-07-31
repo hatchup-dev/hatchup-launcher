@@ -1,6 +1,6 @@
 {
   "name": "hatchup-launcher",
-  "productName": "hatchup-launcher",
+  "productName": "HATCHUP Launcher",
   "version": "1.0.1",
   "description": "HATCHUP Minecraft Launcher",
   "main": ".webpack/main",
@@ -13,7 +13,7 @@
   },
   "keywords": [],
   "author": {
-    "name": "yamitaso",
+    "name": "HATCHUP",
     "email": "dev@hatchup.ru"
   },
   "license": "MIT",
@@ -26,6 +26,7 @@
     "@electron-forge/plugin-auto-unpack-natives": "^7.8.2",
     "@electron-forge/plugin-fuses": "^7.8.2",
     "@electron-forge/plugin-webpack": "^7.8.2",
+    "@electron-forge/publisher-github": "^7.8.2",
     "@electron/fuses": "^1.8.0",
     "@vercel/webpack-asset-relocator-loader": "^1.7.3",
     "copy-webpack-plugin": "^13.0.0",
@@ -45,6 +46,16 @@
   "build": {
     "appId": "ru.hatchup.launcher",
     "productName": "HATCHUP Launcher",
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "src/assets/icon.ico",
+      "uninstallerIcon": "src/assets/icon.ico",
+      "license": "LICENSE.txt"
+    },
     "publish": [
       {
         "provider": "github",
@@ -52,9 +63,6 @@
         "repo": "hatchup-launcher"
       }
     ],
-    "win": {
-      "target": "nsis"
-    },
     "linux": {
       "target": "AppImage"
     }
