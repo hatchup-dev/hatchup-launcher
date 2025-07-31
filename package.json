@@ -1,7 +1,7 @@
 {
   "name": "hatchup-launcher",
   "productName": "HATCHUP Launcher",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "HATCHUP Minecraft Launcher",
   "main": ".webpack/main",
   "scripts": {
