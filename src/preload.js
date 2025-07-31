@@ -1,5 +1,7 @@
 const { contextBridge, ipcRenderer } = require('electron');
-
+const ramConfigArg = process.argv.find(arg => arg.startsWith('--ram-config='));
+const ramConfigJSON = ramConfigArg ? ramConfigArg.split('=')[1] : '{}';
+const ramConfig = JSON.parse(ramConfigJSON);
 contextBridge.exposeInMainWorld('api', {
     // Запуск игры
     launchGame: (args) => ipcRenderer.invoke('launch-game', args),
@@ -17,4 +19,5 @@ contextBridge.exposeInMainWorld('api', {
     minimizeWindow: () => ipcRenderer.send('minimize-window'),
     restoreWindow: () => ipcRenderer.send('restore-window'),
     closeWindow: () => ipcRenderer.send('close-window'),
+    getRamConfiguration: () => ramConfig,
 });

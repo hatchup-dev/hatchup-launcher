@@ -39,7 +39,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const fullscreenCheckbox = document.getElementById('fullscreen-checkbox');
     const autoconnectCheckbox = document.getElementById('autoconnect-checkbox');
 
-
+    const statusIndicator = document.getElementById('status-indicator');
+    const statusTextShort = document.getElementById('status-text-short');
+    const tooltipMotd = document.getElementById('tooltip-motd');
+    const tooltipDescription = document.getElementById('tooltip-description');
+    const tooltipPlayers = document.getElementById('tooltip-players');
+    const tooltipPlayerList = document.getElementById('tooltip-player-list');
+    const serverLogoContainer = document.getElementById('server-logo-container');
 
     launcherLogoImg.src = launcherLogoSrc;
     settingsIconImg.src = settingsIconSrc;
@@ -49,23 +55,68 @@ document.addEventListener('DOMContentLoaded', () => {
     arrowRightImg.src = arrowRightSrc;
     titleBarIcon.src = launcherLogoSrc;
 
+    const ramConfig = window.api.getRamConfiguration();
+    ramSlider.min = ramConfig.min;
+    ramSlider.max = ramConfig.max;
+    ramInput.min = ramConfig.min;
+    ramInput.max = ramConfig.max;
+
     minimizeButton.addEventListener('click', () => {
         window.api.minimizeWindow();
     });
     closeButton.addEventListener('click', () => {
         window.api.closeWindow();
     });
-    serverLogoImg.addEventListener('mouseenter', () => {
+    serverLogoContainer.addEventListener('mouseenter', () => {
         backgroundImage.classList.add('zoomed');
     });
-    serverLogoImg.addEventListener('mouseleave', () => {
+    serverLogoContainer.addEventListener('mouseleave', () => {
         backgroundImage.classList.remove('zoomed');
     });
+
+    window.api.on('update-server-status', (status) => {
+        if (status && status.online) {
+            // --- СЕРВЕР ОНЛАЙН ---
+            statusIndicator.className = 'status-indicator online';
+            statusTextShort.textContent = `${status.players.online} / ${status.players.max}`;
+
+            // Обновляем Tooltip
+            const motdContent = status.motd.clean.split(/\r?\n/);
+            tooltipMotd.textContent = motdContent[0];
+            tooltipDescription.textContent = motdContent[1];
+            tooltipPlayers.textContent = `${status.players.online} / ${status.players.max}`;
+
+            // Очищаем и заполняем список игроков
+            tooltipPlayerList.innerHTML = '';
+            if (status.players.list && status.players.list.length > 0) {
+                // Показываем не более 10 игроков
+                status.players.list.slice(0, 10).forEach(player => {
+                    const li = document.createElement('li');
+                    li.textContent = player.name_clean;
+                    tooltipPlayerList.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.textContent = 'На сервере сейчас никого нет';
+                tooltipPlayerList.appendChild(li);
+            }
+        } else {
+            // --- СЕРВЕР ОФФЛАЙН ---
+            statusIndicator.className = 'status-indicator offline';
+            statusTextShort.textContent = 'Оффлайн';
+
+            // Обновляем Tooltip
+            tooltipMotd.textContent = 'Сервер недоступен';
+            tooltipPlayers.textContent = 'N/A';
+            tooltipPlayerList.innerHTML = '<li>Не удалось получить список игроков.</li>';
+        }
+    });
+
     async function loadSettings() {
         let settings = await window.api.getStoreValue('settings');
         if (!settings) {
             settings = { // Значения по умолчанию
-                ram: 4,
+                ram: ramConfig.default,
                 window: { width: 1024, height: 768 },
                 fullscreen: false,
                 autoConnect: true,
@@ -76,8 +127,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ramSlider.value = settings.ram;
         ramInput.value = settings.ram;
         ramValueLabel.textContent = `${settings.ram} GB`;
-        windowWidthInput.value = settings.window.width;
-        windowHeightInput.value = settings.window.height;
+        windowWidthInput.value = settings.window.width || '';
+        windowHeightInput.value = settings.window.height || '';
         fullscreenCheckbox.checked = settings.fullscreen;
         autoconnectCheckbox.checked = settings.autoConnect;
     }

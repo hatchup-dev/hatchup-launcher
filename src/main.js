@@ -1,6 +1,8 @@
 import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import path from 'path';
+import os from 'os';
 import Store from 'electron-store';
+import fetch from 'node-fetch';
 import { ensureJavaRuntime } from './java-manager.js';
 import { ensureForgeInstaller, startGame, syncMods } from './launcher.js';
 import { updateElectronApp } from 'update-electron-app';
@@ -42,7 +44,7 @@ const createWindow = () => {
         width: 1024,
         height: 768,
         minWidth: 900,
-        minHeight: 600,
+        minHeight: 720,
         show: false,
         frame: false,
         transparent: true,
@@ -53,8 +55,10 @@ const createWindow = () => {
         resizable: true, // Временно поставим true для удобства отладки
         webPreferences: {
             preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+            additionalArguments: [`--ram-config=${JSON.stringify(getRamConfiguration())}`]
         },
     });
+
 
     mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
@@ -67,6 +71,40 @@ const createWindow = () => {
     }
 
 };
+
+async function checkServerStatus() {
+    // Если главного окна нет, ничего не делаем
+    if (!mainWindow) return;
+
+    const serverAddress = HATCHUP_CREATE_PROFILE.serverIp;
+    const apiUrl = `https://api.mcstatus.io/v2/status/java/${serverAddress}`;
+
+    try {
+        const response = await fetch(apiUrl);
+        const serverStatus = await response.json();
+
+        // Отправляем полные данные в окно, даже если сервер оффлайн (API все равно вернет `online: false`)
+        mainWindow.webContents.send('update-server-status', serverStatus);
+    } catch (error) {
+        // Если произошла сетевая ошибка, отправляем "пустой" оффлайн-статус
+        console.error('Failed to get server status from mcstatus.io:', error.message);
+        mainWindow.webContents.send('update-server-status', { online: false });
+    }
+}
+function getRamConfiguration() {
+    // Получаем общий объем ОЗУ в байтах и конвертируем в гигабайты
+    const totalRamGB = Math.floor(os.totalmem() / (1024 * 1024 * 1024));
+
+    let defaultRam = Math.floor(totalRamGB / 2);
+    if (defaultRam > 6) defaultRam = 6;
+    if (defaultRam < 2) defaultRam = 2;
+
+    return {
+        min: 2, // Жестко заданный минимум
+        max: totalRamGB, // Максимум - это вся память ПК
+        default: defaultRam, // Наше расчетное значение по умолчанию
+    };
+}
 ipcMain.on('renderer-ready', () => {
     console.log('Received renderer-ready signal. Showing main window.');
     if (loadingWindow) {
@@ -76,6 +114,8 @@ ipcMain.on('renderer-ready', () => {
     if (mainWindow) {
         mainWindow.show();
         mainWindow.focus();
+        checkServerStatus();
+        setInterval(checkServerStatus, 30000);
     }
 });
 app.on('ready', () => {
@@ -171,6 +211,21 @@ ipcMain.handle('launch-game', async (event, { nickname }) => {
 
 // Сохранение и загрузка настроек
 ipcMain.handle('get-store-value', (event, key) => {
+    if (key === 'settings') {
+        const ramConfig = getRamConfiguration();
+        const storedSettings = store.get('settings');
+
+        // Если настроек нет, создаем их с правильным значением RAM по умолчанию
+        if (!storedSettings) {
+            return {
+                ram: ramConfig.default,
+                window: { width: 1024, height: 768 },
+                fullscreen: false,
+                autoConnect: true,
+            };
+        }
+        return storedSettings;
+    }
     return store.get(key);
 });
 ipcMain.handle('set-store-value', (event, { key, value }) => {

@@ -107,7 +107,29 @@
 
         <!-- Центральная часть -->
         <main>
-            <img id="server-logo-img" src="" draggable="false" alt="Server Logo" class="server-logo">
+            <div id="server-logo-container" class="server-logo-container">
+                <!-- Логотип сервера -->
+                <img id="server-logo-img" src="" draggable="false" alt="Server Logo" class="server-logo">
+
+                <!-- Краткий статус (теперь ВНУТРИ контейнера) -->
+                <div id="server-status-short" class="server-status-short">
+                    <div id="status-indicator" class="status-indicator"></div>
+                    <span id="status-text-short">...</span>
+                </div>
+
+                <!-- Подробный статус (Tooltip) (тоже ВНУТРИ) -->
+                <div id="server-tooltip" class="server-tooltip">
+                    <h3 id="tooltip-motd"></h3>
+                    <p id="tooltip-description"></p>
+                    <div class="tooltip-online-info">
+                        <strong>Онлайн:</strong> <span id="tooltip-players"></span>
+                    </div>
+                    <div class="tooltip-player-list-container">
+                        <strong>Игроки онлайн:</strong>
+                        <ul id="tooltip-player-list"></ul>
+                    </div>
+                </div>
+            </div>
             <p class="server-description">
                 Сервер, ориентированный на роботизацию и автоматизацию, построенный на базе мода Create.
             </p>
