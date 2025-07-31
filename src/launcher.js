@@ -127,7 +127,7 @@ async function startGame(profile, options, onProgress) {
         };
         onProgress(progressData);
     });
-    launcher.on('data', (e) => {
+    launcher.once('data', (e) => {
         onProgress({ text: 'Приятной игры!', launched: true });
     });
     launcher.on('close', (e) => {

@@ -14,4 +14,7 @@ contextBridge.exposeInMainWorld('api', {
     },
     openGameFolder: () => ipcRenderer.send('open-game-folder'),
     notifyMainWhenReady: () => ipcRenderer.send('renderer-ready'),
+    minimizeWindow: () => ipcRenderer.send('minimize-window'),
+    restoreWindow: () => ipcRenderer.send('restore-window'),
+    closeWindow: () => ipcRenderer.send('close-window'),
 });

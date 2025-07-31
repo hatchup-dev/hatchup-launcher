@@ -3,7 +3,7 @@ import launcherLogoSrc from './assets/launcher-logo.png';
 import settingsIconSrc from './assets/settings-icon.svg';
 import serverLogoSrc from './assets/logo.png';
 import folderIconSrc from './assets/folder-icon.svg';
-import arrowLeftSrc from './assets/arrow-left.svg';   // <-- ДОБАВИТЬ
+import arrowLeftSrc from './assets/arrow-left.svg';
 import arrowRightSrc from './assets/arrow-right.svg';
 import './assets/background-day.png';
 import './assets/background-night.png';
@@ -18,9 +18,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingsIconImg = document.getElementById('settings-icon-img');
     const serverLogoImg = document.getElementById('server-logo-img');
     const folderIconImg = document.getElementById('folder-icon-img');
-    const arrowLeftImg = document.getElementById('arrow-left-img');   // <-- ДОБАВИТЬ
+    const arrowLeftImg = document.getElementById('arrow-left-img');
     const arrowRightImg = document.getElementById('arrow-right-img');
     const launcherLogoImg = document.getElementById('launcher-logo-img');
+
+    const titleBarIcon = document.getElementById('title-bar-icon');
+    const minimizeButton = document.getElementById('minimize-button');
+    const closeButton = document.getElementById('close-button');
 
     const settingsButton = document.getElementById('settings-button');
     const settingsModal = document.getElementById('settings-modal');
@@ -41,9 +45,16 @@ document.addEventListener('DOMContentLoaded', () => {
     settingsIconImg.src = settingsIconSrc;
     serverLogoImg.src = serverLogoSrc;
     folderIconImg.src = folderIconSrc;
-    arrowLeftImg.src = arrowLeftSrc;     // <-- ДОБАВИТЬ
+    arrowLeftImg.src = arrowLeftSrc;
     arrowRightImg.src = arrowRightSrc;
+    titleBarIcon.src = launcherLogoSrc;
 
+    minimizeButton.addEventListener('click', () => {
+        window.api.minimizeWindow();
+    });
+    closeButton.addEventListener('click', () => {
+        window.api.closeWindow();
+    });
     serverLogoImg.addEventListener('mouseenter', () => {
         backgroundImage.classList.add('zoomed');
     });
@@ -143,15 +154,17 @@ document.addEventListener('DOMContentLoaded', () => {
         playButton.textContent = 'ЗАПУСК...';
         statusText.textContent = 'Подготовка к запуску...';
         progressBar.style.width = '0%';
-
-        // Предполагаем, что у вас есть настройка ОЗУ, пока захардкодим
-        const ram = 4; // В будущем будет браться из настроек
-        const result = await window.api.launchGame({ nickname, ram });
+        hideModal();
+        settingsButton.classList.add("disabled");
+        settingsIconImg.classList.add("disabled");
+        const result = await window.api.launchGame({ nickname });
 
         if (!result.success) {
             statusText.textContent = `Ошибка: ${result.error}`;
             playButton.disabled = false;
             playButton.textContent = 'Начать игру';
+            settingsButton.classList.remove(".disabled");
+            settingsIconImg.classList.remove("disabled");
         }
     });
     loadSettings();
@@ -165,12 +178,19 @@ document.addEventListener('DOMContentLoaded', () => {
             progressBar.style.width = '100%';
             playButton.textContent = 'ИГРА ЗАПУЩЕНА';
             playButton.disabled = true;
+            settingsButton.classList.add("disabled");
+            settingsIconImg.classList.add("disabled");
+            setTimeout(() => window.api.minimizeWindow(), 2000);
+
 
         }
         if (status.finished || status.error) {
             playButton.disabled = false;
+            settingsButton.classList.remove("disabled");
+            settingsIconImg.classList.remove("disabled");
             playButton.textContent = 'Начать игру';
             progressBar.style.width = '0%';
+            window.api.restoreWindow();
         }
     });
     const loadImage = (imgElement) => {
@@ -202,7 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Renderer is fully ready. Notifying main process.');
             // ...отправляем сигнал в main.js!
             setTimeout(() => window.api.notifyMainWhenReady(), 2000);
-            
+
         })
         .catch(error => {
             console.error('Failed to initialize renderer:', error);

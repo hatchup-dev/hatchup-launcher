@@ -5,7 +5,7 @@ import { ensureJavaRuntime } from './java-manager.js';
 import { ensureForgeInstaller, startGame, syncMods } from './launcher.js';
 import { updateElectronApp } from 'update-electron-app';
 if (require('electron-squirrel-startup')) {
-  app.quit();
+    app.quit();
 }
 // Создаем хранилище для настроек
 const store = new Store();
@@ -36,12 +36,18 @@ const createLoadingWindow = () => {
     loadingWindow.loadURL(LOADING_WINDOW_WEBPACK_ENTRY);
 };
 const createWindow = () => {
-     mainWindow = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         width: 1024,
         height: 768,
         minWidth: 900,
         minHeight: 600,
         show: false,
+        frame: false,
+        transparent: true,
+        backgroundColor: '#00000000',
+        // -----------------------
+        icon: path.join(__dirname, 'assets', 'icon.ico'),
+
         resizable: true, // Временно поставим true для удобства отладки
         webPreferences: {
             preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
@@ -58,8 +64,8 @@ const createWindow = () => {
         mainWindow.webContents.openDevTools();
     }
 
-     mainWindow.once('ready-to-show', () => {
-        
+    mainWindow.once('ready-to-show', () => {
+
     });
 };
 ipcMain.on('renderer-ready', () => {
@@ -90,7 +96,25 @@ app.on('activate', () => {
         createWindow();
     }
 });
+ipcMain.on('minimize-window', () => {
+    if (mainWindow) {
+        mainWindow.minimize();
+    }
+});
+ipcMain.on('restore-window', () => {
+    if (mainWindow) {
+        if (mainWindow.isMinimized()) {
+            mainWindow.restore();
+        }
+        mainWindow.focus();
+    }
+});
 
+ipcMain.on('close-window', () => {
+    if (mainWindow) {
+        mainWindow.close();
+    }
+});
 // === Обработчики событий от интерфейса (Renderer) ===
 
 // Получение прогресса и отправка в окно
