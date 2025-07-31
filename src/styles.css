@@ -1,0 +1,432 @@
+@font-face {
+    font-display: swap;
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 400;
+    src: url('./assets/fonts/roboto-v48-cyrillic_latin-regular.woff2') format('woff2');
+}
+
+/* roboto-700 - latin_cyrillic */
+@font-face {
+    font-display: swap;
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 700;
+    src: url('./assets/fonts/roboto-v48-cyrillic_latin-700.woff2') format('woff2');
+}
+
+/* --- Глобальные стили и переменные --- */
+
+:root {
+    --primary-color: #5865F2;
+    /* Синий */
+    --primary-color-hover: #4752C4;
+    --background-color: rgba(30, 30, 30, 0.75);
+    --text-color: #e0e0e0;
+    --text-color-muted: #b0b0b0;
+    --border-color: #444;
+    --input-background: #2a2a2a;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', 'Calibri', sans-serif;
+    ;
+    color: var(--text-color);
+    overflow: hidden;
+}
+
+/* --- Фоновая картинка --- */
+.background-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background-size: cover;
+    background-position: center;
+    transition: background-image 1s ease-in-out, transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transform: scale(1);
+}
+.background-image.zoomed {
+    transform: scale(1.25);
+}
+.background-image.day {
+    background-image: url('./assets/background-day.png');
+}
+
+.background-image.night {
+    background-image: url('./assets/background-night.png');
+}
+
+/* --- Основная сетка лаунчера --- */
+.launcher-container {
+    display: grid;
+    grid-template-rows: 60px 1fr 180px;
+    height: 100vh;
+    padding: 20px;
+    background-color: var(--background-color);
+}
+
+/* --- Перекрашивание SVG в белый цвет --- */
+.icon-svg {
+    filter: invert(90%) sepia(0%) saturate(300%) hue-rotate(180deg) brightness(150%) contrast(90%);
+}
+
+/* --- ИЗМЕНЕНИЕ: Header теперь использует space-between --- */
+header {
+    display: flex;
+    justify-content: space-between;
+    /* Размещает дочерние элементы по краям */
+    align-items: center;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    /* Расстояние между лого и текстом */
+}
+
+.logo-container img {
+    width: 80px;
+    height: 80px;
+}
+
+.launcher-title {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+
+/* --- Универсальный стиль для кнопок-иконок --- */
+.icon-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: all 0.2s;
+    background: none;
+    border: none;
+    padding: 8px;
+    border-radius: 5px;
+    flex-shrink: 0;
+}
+
+.icon-button:hover {
+    opacity: 1;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.icon-button img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* --- Main (Центральная часть) --- */
+main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.server-logo {
+    max-width: 350px;
+    max-height: 30vh;
+    margin-bottom: 20px;
+    border: 5px;
+    border-style: solid;
+    border-radius: 10px;
+    border-color: #4752C4;
+    transition: all 0.3s ease;
+}
+
+.server-logo:hover {
+    transform: scale(1.25);
+    box-shadow: 0 0 10px 5px #48abe0,
+        0 0 10px 5px #5865F2;
+    opacity: 0.25;
+}
+.server-logo:hover ~ .server-description {
+    transform: translateY(100%);
+}
+
+.server-description {
+    font-size: 1.1em;
+    max-width: 500px;
+    color: var(--text-color-muted);
+    text-shadow: 1px 1px 3px #000;
+    transition: all 0.3s ease;
+}
+
+/* --- Карусель (Стрелки) --- */
+.carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 60px;
+    height: 60px;
+    padding: 10px;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.3s;
+    user-select: none;
+    display: none; 
+}
+
+.launcher-container:hover .carousel-arrow {
+    opacity: 0.6;
+}
+
+.carousel-arrow:hover {
+    opacity: 1;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-arrow.left {
+    left: 20px;
+}
+
+.carousel-arrow.right {
+    right: 20px;
+}
+
+/* --- Footer (Нижняя часть) --- */
+footer {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 15px;
+}
+
+.input-bar {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+    max-width: 450px;
+}
+
+#nickname {
+    flex-grow: 1;
+    padding: 12px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    background-color: var(--input-background);
+    color: var(--text-color);
+    font-size: 1.1em;
+    text-align: center;
+}
+
+.play-button-container {
+    width: 100%;
+    max-width: 450px;
+}
+
+#play-button {
+    width: 100%;
+    padding: 15px 25px;
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #fff;
+
+    background: linear-gradient(45deg, #5867f0, #66f190);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#play-button:enabled:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 10px 5px #5867f066;
+}
+
+#play-button:active {
+    transform: scale(0.99);
+}
+
+#play-button:disabled {
+    background: #333;
+    color: #777;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* --- Status Bar --- */
+.status-area {
+    text-align: center;
+    width: 100%;
+    max-width: 450px;
+}
+
+#status-text {
+    color: var(--text-color-muted);
+    min-height: 20px;
+}
+
+.progress-bar-container {
+    background-color: var(--input-background);
+    border-radius: 5px;
+    overflow: hidden;
+    height: 8px;
+    margin-top: 5px;
+}
+
+.progress-bar {
+    width: 0%;
+    height: 100%;
+    background-color: var(--primary-color);
+    transition: width 0.1s linear;
+}
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 1;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.modal-backdrop.hidden {
+    opacity: 0;
+    pointer-events: none;
+    /* Нельзя кликнуть на невидимый элемент */
+}
+
+.modal-content {
+    background: #202225;
+    /* Темный фон */
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 550px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    transform: scale(1);
+    transition: transform 0.2s ease-in-out;
+}
+
+.modal-backdrop.hidden .modal-content {
+    transform: scale(0.95);
+}
+
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.modal-header h2 {
+    font-size: 1.8em;
+}
+
+.close-button {
+    font-size: 2.5em;
+    color: var(--text-color-muted);
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.close-button:hover {
+    color: #fff;
+}
+
+.settings-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.setting-item label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.ram-control,
+.window-size-control {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+input[type="range"] {
+    flex-grow: 1;
+}
+
+input[type="number"] {
+    width: 80px;
+    padding: 8px;
+    background: var(--input-background);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    border-radius: 5px;
+    text-align: center;
+}
+
+.window-size-control input {
+    flex-grow: 1;
+}
+
+.checkbox-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.checkbox-control label {
+    margin: 0;
+}
+
+input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+}
+
+
+.modal-footer {
+    margin-top: 30px;
+    text-align: right;
+}
+
+#save-settings-button {
+    padding: 10px 25px;
+    font-size: 1.1em;
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#save-settings-button:hover {
+    background: var(--primary-color-hover);
+}

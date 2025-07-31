@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>HATCHUP Launcher</title>
+
+    <!--
+      Исправленная и полная Политика Безопасности Контента (CSP).
+      Разрешает:
+      - 'unsafe-eval' и 'ws:' для сервера разработки Webpack.
+      - Шрифты с доменов Google.
+      - Локальные ресурсы ('self').
+    -->
+
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; 
+                   script-src 'self' 'unsafe-eval'; 
+                   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
+                   font-src 'self' https://fonts.gstatic.com; 
+                   img-src 'self' data:;
+                   connect-src 'self' ws:;">
+</head>
+
+<body>
+    <div id="background-image" class="background-image"></div>
+
+    <div class="launcher-container">
+        <div id="settings-modal" class="modal-backdrop hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Настройки</h2>
+                    <span id="close-settings-button" class="close-button">×</span>
+                </div>
+
+                <div class="settings-grid">
+                    <!-- Настройка ОЗУ -->
+                    <div class="setting-item">
+                        <label for="ram-slider">Выделение ОЗУ: <span id="ram-value-label">4 GB</span></label>
+                        <div class="ram-control">
+                            <input type="range" id="ram-slider" min="2" max="32" step="1" value="4">
+                            <input type="number" id="ram-input" min="2" max="32" value="4">
+                        </div>
+                    </div>
+
+                    <!-- Настройка Размера окна -->
+                    <div class="setting-item">
+                        <label>Размер окна игры</label>
+                        <div class="window-size-control">
+                            <input type="number" id="window-width-input" placeholder="Ширина">
+                            <span>×</span>
+                            <input type="number" id="window-height-input" placeholder="Высота">
+                        </div>
+                    </div>
+
+                    <!-- Настройка Полноэкранного режима -->
+                    <div class="setting-item checkbox-control">
+                        <input type="checkbox" id="fullscreen-checkbox">
+                        <label for="fullscreen-checkbox">Запускать в полноэкранном режиме</label>
+                    </div>
+
+                    <!-- Настройка Автоподключения -->
+                    <div class="setting-item checkbox-control">
+                        <input type="checkbox" id="autoconnect-checkbox">
+                        <label for="autoconnect-checkbox">Автоподключение к серверу</label>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button id="save-settings-button">Сохранить</button>
+                </div>
+            </div>
+        </div>
+        <!-- ИЗМЕНЕНИЕ: Структура хедера полностью обновлена -->
+        <header>
+            <!-- Контейнер для лого и названия (слева) -->
+            <div class="logo-container">
+                <img id="launcher-logo-img" draggable="false" src="" alt="Launcher Logo">
+                <h1 class="launcher-title">HATCHUP Launcher</h1>
+            </div>
+
+            <!-- Контейнер для настроек (справа) -->
+            <div id="settings-button" class="icon-button">
+                <img id="settings-icon-img" src="" draggable="false" alt="Settings" class="icon-svg">
+            </div>
+        </header>
+
+        <!-- Карусель -->
+        <div id="arrow-left" class="carousel-arrow left">
+            <img id="arrow-left-img" src="" draggable="false" class="icon-svg">
+        </div>
+        <div id="arrow-right" class="carousel-arrow right">
+            <img id="arrow-right-img" src="" draggable="false" class="icon-svg">
+        </div>
+
+        <!-- Центральная часть -->
+        <main>
+            <img id="server-logo-img" src="" draggable="false" alt="Server Logo" class="server-logo">
+            <p class="server-description">
+                Сервер, ориентированный на роботизацию и автоматизацию, построенный на базе мода Create.
+            </p>
+        </main>
+
+        <!-- Футер -->
+        <footer>
+            <div class="input-bar">
+                <input type="text" id="nickname" placeholder="Никнейм">
+                <button id="folder-button" class="icon-button">
+                    <img id="folder-icon-img" src="" draggable="false" alt="Open Folder" class="icon-svg">
+                </button>
+            </div>
+            <div class="play-button-container">
+                <button id="play-button">Запустить игру</button>
+            </div>
+            <div class="status-area">
+                <p id="status-text">Готов к запуску</p>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+
+</html>
