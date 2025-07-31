@@ -1,9 +1,9 @@
 import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import path from 'path';
-import { autoUpdater } from 'electron-updater';
 import Store from 'electron-store';
 import { ensureJavaRuntime } from './java-manager.js';
 import { ensureForgeInstaller, startGame, syncMods } from './launcher.js';
+import { updateElectronApp } from 'update-electron-app';
 if (require('electron-squirrel-startup')) {
   app.quit();
 }
@@ -69,10 +69,9 @@ ipcMain.on('renderer-ready', () => {
         loadingWindow = null;
     }
     if (mainWindow) {
+        updateElectronApp();
         mainWindow.show();
         mainWindow.focus();
-        // Запускаем проверку обновлений только после того, как все готово
-        autoUpdater.checkForUpdatesAndNotify();
     }
 });
 app.on('ready', () => {
