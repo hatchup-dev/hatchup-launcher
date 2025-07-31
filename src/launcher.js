@@ -5,12 +5,11 @@ import crypto from 'crypto';
 import fetch from 'node-fetch';
 
 const launcher = new Client();
-const ROOT_PATH = path.join(process.cwd(), 'minecraft'); // Папка для игры рядом с .exe
-async function ensureForgeInstaller(profile, onProgress) {
+async function ensureForgeInstaller(profile, rootPath, onProgress) {
     onProgress({ text: 'Проверка установщика Forge...' });
     const installerName = profile.forgeInstallerName;
     // Используем path.join для кроссплатформенности
-    const installerPath = path.join(ROOT_PATH, installerName);
+    const installerPath = path.join(rootPath, installerName);
 
     // Если файл уже есть, ничего не делаем
     if (fs.existsSync(installerPath)) {
@@ -41,8 +40,8 @@ async function ensureForgeInstaller(profile, onProgress) {
     }
 }
 // Функция для синхронизации модов
-async function syncMods(manifestUrl, onProgress) {
-    const modsDir = path.join(ROOT_PATH, 'mods');
+async function syncMods(manifestUrl, rootPath, onProgress) {
+    const modsDir = path.join(rootPath, 'mods');
     if (!fs.existsSync(modsDir)) {
         fs.mkdirSync(modsDir, { recursive: true });
     }
@@ -92,7 +91,7 @@ async function startGame(profile, options, onProgress) {
     const opts = {
         javaPath: options.javaPath,
         authorization: await Authenticator.getAuth(options.nickname),
-        root: ROOT_PATH,
+        root: options.rootPath,
         version: {
             number: profile.minecraftVersion,
             type: "release"

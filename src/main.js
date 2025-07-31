@@ -7,6 +7,8 @@ import { updateElectronApp } from 'update-electron-app';
 if (require('electron-squirrel-startup')) {
     app.quit();
 }
+const USER_DATA_PATH = app.getPath('userData');
+const ROOT_PATH = path.join(USER_DATA_PATH, 'minecraft');
 // Создаем хранилище для настроек
 const store = new Store();
 let mainWindow;
@@ -64,9 +66,6 @@ const createWindow = () => {
         mainWindow.webContents.openDevTools();
     }
 
-    mainWindow.once('ready-to-show', () => {
-
-    });
 };
 ipcMain.on('renderer-ready', () => {
     console.log('Received renderer-ready signal. Showing main window.');
@@ -75,12 +74,15 @@ ipcMain.on('renderer-ready', () => {
         loadingWindow = null;
     }
     if (mainWindow) {
-        updateElectronApp();
         mainWindow.show();
         mainWindow.focus();
     }
 });
 app.on('ready', () => {
+    updateElectronApp({
+        repo: 'hatchup-dev/hatchup-launcher', // ЗАМЕНИТЬ на ваше
+        updateInterval: '1 hour'
+    });
     createLoadingWindow();
     createWindow();
 });
@@ -133,14 +135,14 @@ ipcMain.handle('launch-game', async (event, { nickname }) => {
         };
         const settings = { ...defaults, ...store.get('settings') };
         // Вызываем менеджер Java
-        const javaPath = await ensureJavaRuntime((progress) => {
+        const javaPath = await ensureJavaRuntime(ROOT_PATH, (progress) => {
             sendToRenderer('update-status', progress);
         });
-        const forgeInstallerPath = await ensureForgeInstaller(HATCHUP_CREATE_PROFILE, (progress) => {
+        const forgeInstallerPath = await ensureForgeInstaller(HATCHUP_CREATE_PROFILE, ROOT_PATH, (progress) => {
             sendToRenderer('update-status', progress);
         });
         sendToRenderer('update-status', { text: 'Синхронизация модов...' });
-        await syncMods(HATCHUP_CREATE_PROFILE.modsUrl, (progress) => {
+        await syncMods(HATCHUP_CREATE_PROFILE.modsUrl, ROOT_PATH, (progress) => {
             sendToRenderer('update-status', progress);
         });
 
@@ -149,6 +151,7 @@ ipcMain.handle('launch-game', async (event, { nickname }) => {
             nickname: nickname,
             javaPath: javaPath,
             forgeInstallerPath: forgeInstallerPath,
+            rootPath: ROOT_PATH, 
             ram: settings.ram,
             window: settings.window,
             fullscreen: settings.fullscreen,
@@ -174,7 +177,5 @@ ipcMain.handle('set-store-value', (event, { key, value }) => {
     store.set(key, value);
 });
 ipcMain.on('open-game-folder', () => {
-    const rootPath = path.join(process.cwd(), 'minecraft');
-    // Безопасно открываем путь в системном файловом менеджере
-    shell.openPath(rootPath);
+    shell.openPath(ROOT_PATH);
 });

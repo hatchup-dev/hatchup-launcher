@@ -4,8 +4,6 @@ import os from 'os';
 import fetch from 'node-fetch';
 import decompress from 'decompress';
 
-const ROOT_PATH = path.join(process.cwd(), 'minecraft');
-const RUNTIME_DIR = path.join(ROOT_PATH, 'runtime');
 
 // Функция для уведомления о прогрессе в UI
 let onProgress = () => {};
@@ -28,19 +26,20 @@ function getPlatformDetails() {
 }
 
 // Получаем путь к исполняемому файлу Java внутри распакованной папки
-function getJavaExecutablePath() {
+function getJavaExecutablePath(runtimeDir) {
     const platform = os.platform();
     if (platform === 'win32') {
-        return path.join(RUNTIME_DIR, `jdk-${JAVA_VERSION}`, 'bin', 'javaw.exe');
+        return path.join(runtimeDir, `jdk-${JAVA_VERSION}`, 'bin', 'javaw.exe');
     } else { // linux, macos
-        return path.join(RUNTIME_DIR, `jdk-${JAVA_VERSION}`, 'bin', 'java');
+        return path.join(runtimeDir, `jdk-${JAVA_VERSION}`, 'bin', 'java');
     }
 }
 
 
-async function ensureJavaRuntime(progressCallback) {
+async function ensureJavaRuntime(rootPath, progressCallback) {
     onProgress = progressCallback;
-    const javaExecutable = getJavaExecutablePath();
+    const RUNTIME_DIR = path.join(rootPath, 'runtime');
+    const javaExecutable = getJavaExecutablePath(RUNTIME_DIR); 
     
     onProgress({ text: 'Проверка среды выполнения Java...' });
     
@@ -63,13 +62,13 @@ async function ensureJavaRuntime(progressCallback) {
         const data = await response.json();
         
         const downloadUrl = data[0].binary.package.link;
-        const tempFileName = path.join(ROOT_PATH, 'jre.tmp');
+        const tempFileName = path.join(rootPath, 'jre.tmp');
 
         onProgress({ text: `Загрузка Java JRE ${JAVA_VERSION}...` });
         const fileResponse = await fetch(downloadUrl);
         
-        if (!fs.existsSync(ROOT_PATH)) {
-            fs.mkdirSync(ROOT_PATH, { recursive: true });
+        if (!fs.existsSync(rootPath)) {
+            fs.mkdirSync(rootPath, { recursive: true });
         }
         
         const fileStream = fs.createWriteStream(tempFileName);
