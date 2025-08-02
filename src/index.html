@@ -4,15 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <title>HATCHUP Launcher</title>
-
-    <!--
-      Исправленная и полная Политика Безопасности Контента (CSP).
-      Разрешает:
-      - 'unsafe-eval' и 'ws:' для сервера разработки Webpack.
-      - Шрифты с доменов Google.
-      - Локальные ресурсы ('self').
-    -->
-
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; 
                    script-src 'self' 'unsafe-eval'; 
                    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
@@ -137,20 +128,45 @@
 
         <!-- Футер -->
         <footer>
-            <div class="input-bar">
-                <input type="text" id="nickname" placeholder="Никнейм">
-                <button id="folder-button" class="icon-button">
-                    <img id="folder-icon-img" src="" draggable="false" alt="Open Folder" class="icon-svg">
+            <div id="login-view" class="view">
+                <button id="discord-login-button" class="discord-button">
+                    <img id="discord-logo-img" src="" alt="Discord Logo">
+                    <span>Войти через Discord</span>
                 </button>
+                <p id="login-status-text"></p>
             </div>
-            <div class="play-button-container">
-                <button id="play-button">Запустить игру</button>
-            </div>
-            <div class="status-area">
-                <p id="status-text">Готов к запуску</p>
-                <div class="progress-bar-container">
-                    <div class="progress-bar" id="progress-bar"></div>
+
+            <!-- ЭТОТ БЛОК БУДЕТ ПОКАЗАН ПОСЛЕ УСПЕШНОЙ АВТОРИЗАЦИИ -->
+            <div id="game-view" class="view hidden">
+                <div class="input-bar">
+                    <!-- Никнейм теперь не редактируется -->
+                    <input type="text" id="nickname" placeholder="Никнейм" readonly>
+                    <button id="folder-button" class="icon-button" title="Открыть папку Minecraft">
+                        <img id="folder-icon-img" src="" draggable="false" alt="Open Folder" class="icon-svg">
+                    </button>
+                    <button id="logout-button" class="icon-button" title="Сменить аккаунт">
+                        <img id="logout-icon-img" src="" draggable="false" alt="Logout" class="icon-svg">
+                    </button>
                 </div>
+                <div class="play-button-container">
+                    <button id="play-button">Запустить игру</button>
+                </div>
+                <div class="status-area">
+                    <p id="status-text">Готов к запуску</p>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="progress-bar"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ЭТОТ БЛОК БУДЕТ ПОКАЗАН, ЕСЛИ НУЖНА РЕГИСТРАЦИЯ НИКА -->
+            <div id="register-view" class="view hidden">
+                <p>Добро пожаловать! Придумайте себе никнейм в Minecraft.</p>
+                <div class="input-bar">
+                    <input type="text" id="register-nickname-input" placeholder="Желаемый никнейм">
+                    <button id="register-button">Сохранить и войти</button>
+                </div>
+                <p id="register-error-text" class="error-text"></p>
             </div>
         </footer>
     </div>

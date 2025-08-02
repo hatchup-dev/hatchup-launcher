@@ -3,8 +3,10 @@ import launcherLogoSrc from './assets/launcher-logo.png';
 import settingsIconSrc from './assets/settings-icon.svg';
 import serverLogoSrc from './assets/logo.png';
 import folderIconSrc from './assets/folder-icon.svg';
+import logoutIconSrc from './assets/logout-icon.svg';
 import arrowLeftSrc from './assets/arrow-left.svg';
 import arrowRightSrc from './assets/arrow-right.svg';
+import discordLogoSrc from './assets/discord-logo.svg';
 import './assets/background-day.png';
 import './assets/background-night.png';
 document.addEventListener('DOMContentLoaded', () => {
@@ -18,9 +20,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingsIconImg = document.getElementById('settings-icon-img');
     const serverLogoImg = document.getElementById('server-logo-img');
     const folderIconImg = document.getElementById('folder-icon-img');
+    const logoutIconImg = document.getElementById('logout-icon-img');
     const arrowLeftImg = document.getElementById('arrow-left-img');
     const arrowRightImg = document.getElementById('arrow-right-img');
     const launcherLogoImg = document.getElementById('launcher-logo-img');
+    const logoutButton = document.getElementById('logout-button');
+
+    const loginView = document.getElementById('login-view');
+    const gameView = document.getElementById('game-view');
+    const registerView = document.getElementById('register-view');
+    const loginStatusText = document.getElementById('login-status-text');
+
+    const discordLoginButton = document.getElementById('discord-login-button');
+    const discordLogoImg = document.getElementById('discord-logo-img');
+    discordLogoImg.src = discordLogoSrc;
+
 
     const titleBarIcon = document.getElementById('title-bar-icon');
     const minimizeButton = document.getElementById('minimize-button');
@@ -47,10 +61,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const tooltipPlayerList = document.getElementById('tooltip-player-list');
     const serverLogoContainer = document.getElementById('server-logo-container');
 
+    const registerNicknameInput = document.getElementById('register-nickname-input');
+    const registerButton = document.getElementById('register-button');
+    const registerErrorText = document.getElementById('register-error-text');
+    let registrationData = {};
+
     launcherLogoImg.src = launcherLogoSrc;
     settingsIconImg.src = settingsIconSrc;
     serverLogoImg.src = serverLogoSrc;
     folderIconImg.src = folderIconSrc;
+    logoutIconImg.src = logoutIconSrc;
     arrowLeftImg.src = arrowLeftSrc;
     arrowRightImg.src = arrowRightSrc;
     titleBarIcon.src = launcherLogoSrc;
@@ -72,6 +92,113 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     serverLogoContainer.addEventListener('mouseleave', () => {
         backgroundImage.classList.remove('zoomed');
+    });
+    function showView(viewName) {
+        loginView.classList.add('hidden');
+        gameView.classList.add('hidden');
+        registerView.classList.add('hidden');
+        document.getElementById(`${viewName}-view`).classList.remove('hidden');
+    }
+    async function logout() {
+        // 1. Получаем текущий токен сессии
+        const token = await window.api.getStoreValue('sessionToken');
+
+        // 2. Если токен есть, отправляем запрос на сервер для его аннулирования
+        if (token) {
+            await window.api.logout(token);
+        }
+
+        // 3. Очищаем локальные данные (этот код остается без изменений)
+        window.api.setStoreValue('sessionToken', null);
+        sessionStorage.removeItem('minecraftUuid');
+        sessionStorage.removeItem('discordId');
+        nicknameInput.value = '';
+        registerNicknameInput.value = '';
+        registerErrorText.textContent = '';
+        loginStatusText.textContent = '';
+        statusText.textContent = 'Готов к запуску';
+        showView('login');
+    }
+
+    // --- ИЗМЕНЕНИЕ: Обновляем обработчик кнопки ---
+    logoutButton.addEventListener('click', () => {
+        logout();
+    });
+    // --- Обработчики событий ---
+    discordLoginButton.addEventListener('click', () => {
+        window.api.startDiscordAuth();
+    });
+
+    // Слушаем событие с кодом от main.js
+    window.api.on('discord-auth-code', async (code) => {
+        loginStatusText.textContent = 'Проверка авторизации...';
+        const result = await window.api.processDiscordAuth(code);
+
+        if (result.status === 'ok') {
+            window.api.setStoreValue('sessionToken', result.sessionToken);
+            nicknameInput.value = result.minecraftNickname;
+            sessionStorage.setItem('minecraftUuid', result.minecraftUuid);
+            showView('game');
+        } else if (result.status === 'register_needed') {
+            registrationData = {
+                discordId: result.discordId,
+                discordUsername: result.discordUsername
+            };
+            // Предзаполняем поле ником из Discord для удобства
+            registerNicknameInput.value = result.discordUsername;
+            registerErrorText.textContent = ''; // Очищаем ошибки
+            showView('register');
+        } else {
+            // ЛЮБАЯ ДРУГАЯ ОШИБКА (нет на сервере, ошибка бэкенда)
+            // Main уже показал страницу ошибки в браузере.
+            // Мы просто возвращаем лаунчер в исходное состояние.
+            loginStatusText.textContent = 'Ошибка авторизации. Пожалуйста, попробуйте снова.';
+            showView('login');
+        }
+    });
+
+    registerButton.addEventListener('click', async () => {
+        const nickname = registerNicknameInput.value;
+
+        // Клиентская валидация
+        if (!/^[a-zA-Z0-9_]{3,16}$/.test(nickname)) {
+            registerErrorText.textContent = 'Неверный формат ника (3-16 символов, a-z, A-Z, 0-9, _).';
+            return;
+        }
+
+        registerButton.disabled = true;
+        registerErrorText.textContent = 'Регистрация...';
+
+        const response = await window.api.registerNickname({
+            discordId: registrationData.discordId,
+            minecraftNickname: nickname
+        });
+
+        if (response.httpStatus === 201) { // 201 Created - успех
+            // Успешная регистрация!
+            window.api.setStoreValue('sessionToken', response.sessionToken);
+            nicknameInput.value = response.minecraftNickname;
+            sessionStorage.setItem('minecraftUuid', response.minecraftUuid);
+            showView('game');
+        } else {
+            // Показываем ошибку от бэкенда
+            registerErrorText.textContent = response.error || 'Произошла неизвестная ошибка.';
+        }
+
+        registerButton.disabled = false;
+    });
+
+    // --- Инициализация ---
+    // Проверяем, есть ли у нас уже токен сессии
+    window.api.getStoreValue('sessionToken').then(token => {
+        if (token) {
+            // TODO: Проверить валидность токена на бэкенде
+            // Пока просто показываем игровой экран
+            // nicknameInput.value = ... (нужно получить ник)
+            // showView('game');
+        } else {
+            showView('login');
+        }
     });
 
     window.api.on('update-server-status', (status) => {
@@ -203,12 +330,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
         playButton.disabled = true;
         playButton.textContent = 'ЗАПУСК...';
+
+        statusText.textContent = 'Авторизация игровой сессии...';
+        const sessionToken = await window.api.getStoreValue('sessionToken');
+        if (!sessionToken) {
+            statusText.textContent = 'Ошибка: данные сессии не найдены.';
+            logout();
+            return;
+        }
+
+
+
         statusText.textContent = 'Подготовка к запуску...';
         progressBar.style.width = '0%';
         hideModal();
         settingsButton.classList.add("disabled");
         settingsIconImg.classList.add("disabled");
-        const result = await window.api.launchGame({ nickname });
+
+        const minecraftUuid = sessionStorage.getItem('minecraftUuid');
+        if (!minecraftUuid) {
+            statusText.textContent = 'Ошибка: UUID не найден. Пожалуйста, перезапустите лаунчер.';
+            return;
+        }
+
+
+        const result = await window.api.launchGame({
+            nickname, sessionToken: sessionToken,
+        });
 
         if (!result.success) {
             statusText.textContent = `Ошибка: ${result.error}`;
@@ -255,29 +403,47 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // 2. Собираем все асинхронные задачи в один массив промисов
-    const initializationPromises = [
-        loadSettings(), // Ваша асинхронная функция загрузки настроек
-        loadImage(launcherLogoImg),
-        loadImage(settingsIconImg),
-        loadImage(serverLogoImg),
-        loadImage(folderIconImg),
-        loadImage(arrowLeftImg),
-        loadImage(arrowRightImg),
-    ];
 
-    // 3. Ждем, пока ВСЕ задачи завершатся
-    Promise.all(initializationPromises)
-        .then(() => {
-            // Когда все картинки и настройки загружены...
-            console.log('Renderer is fully ready. Notifying main process.');
-            // ...отправляем сигнал в main.js!
-            setTimeout(() => window.api.notifyMainWhenReady(), 2000);
+    async function initialize() {
+        // Проверяем, есть ли у нас сохраненный токен
+        const token = await window.api.getStoreValue('sessionToken');
 
-        })
-        .catch(error => {
-            console.error('Failed to initialize renderer:', error);
-            // Даже если есть ошибка, лучше показать окно, чем оставить вечную загрузку
-            window.api.notifyMainWhenReady();
-        });
+        if (token) {
+            // Если токен есть, проверяем его на бэкенде
+            const response = await window.api.verifySession(token);
+
+            if (response.status === 'ok') {
+                nicknameInput.value = response.minecraftNickname;
+                sessionStorage.setItem('minecraftUuid', response.minecraftUuid);
+                showView('game');
+            } else {
+                logout();
+            }
+        } else {
+            // Токена нет, показываем экран входа
+            showView('login');
+        }
+
+        // После проверки авторизации запускаем загрузку остального
+        const initializationPromises = [
+            loadSettings(),
+            loadImage(launcherLogoImg),
+            loadImage(settingsIconImg),
+            loadImage(serverLogoImg),
+            loadImage(folderIconImg),
+            loadImage(arrowLeftImg),
+            loadImage(arrowRightImg),
+        ];
+
+        Promise.all(initializationPromises)
+            .then(() => {
+                setTimeout(() => window.api.notifyMainWhenReady(), 2000);
+            })
+            .catch(error => {
+                console.error('Failed to initialize renderer:', error);
+                setTimeout(() => window.api.notifyMainWhenReady(), 2000);
+            });
+    }
+
+    initialize();
 });

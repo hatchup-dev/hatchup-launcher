@@ -1,7 +1,7 @@
 {
   "name": "hatchup-launcher",
   "productName": "HATCHUP Launcher",
-  "version": "1.0.7",
+  "version": "1.1.0",
   "description": "HATCHUP Minecraft Launcher",
   "main": ".webpack/main",
   "scripts": {
@@ -46,7 +46,8 @@
     "electron-store": "^10.1.0",
     "minecraft-launcher-core": "^3.18.2",
     "node-fetch": "^2.7.0",
-    "update-electron-app": "^3.1.1"
+    "update-electron-app": "^3.1.1",
+    "uuid": "^11.1.0"
   },
   "build": {
     "appId": "ru.hatchup.launcher",

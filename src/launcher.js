@@ -5,6 +5,8 @@ import crypto from 'crypto';
 import fetch from 'node-fetch';
 
 const launcher = new Client();
+const AUTH_BACKEND_URL = 'https://auth.hatchup.ru/authserver';
+Authenticator.changeApiUrl(AUTH_BACKEND_URL);
 async function ensureForgeInstaller(profile, rootPath, onProgress) {
     onProgress({ text: 'Проверка установщика Forge...' });
     const installerName = profile.forgeInstallerName;
@@ -39,6 +41,42 @@ async function ensureForgeInstaller(profile, rootPath, onProgress) {
         throw error;
     }
 }
+
+async function ensureAuthLib(profile, rootPath, onProgress) {
+    onProgress({ text: 'Проверка AuthLib...' });
+    const libName = profile.authLibName;
+    // Используем path.join для кроссплатформенности
+    const libPath = path.join(rootPath, libName);
+
+    // Если файл уже есть, ничего не делаем
+    if (fs.existsSync(libPath)) {
+        console.log('AuthLib найден локально.');
+        onProgress({ text: 'AuthLib найден.' });
+        return libPath;
+    }
+
+    // Если файла нет, скачиваем его
+    console.log('AuthLib не найден, начинается загрузка...');
+    onProgress({ text: 'Загрузка AuthLib...' });
+
+    try {
+        const response = await fetch(profile.authLibUrl);
+        if (!response.ok) {
+            throw new Error(`Ошибка загрузки: ${response.statusText}`);
+        }
+        const fileBuffer = await response.buffer();
+        fs.writeFileSync(libPath, fileBuffer);
+
+        console.log('AuthLib успешно загружен.');
+        onProgress({ text: 'AuthLib загружен.' });
+        return libPath;
+    } catch (error) {
+        console.error('Не удалось скачать AuthLib:', error);
+        onProgress({ text: `Ошибка загрузки AuthLib: ${error.message}`, error: true });
+        throw error;
+    }
+}
+
 // Функция для синхронизации модов
 async function syncMods(manifestUrl, rootPath, onProgress) {
     const modsDir = path.join(rootPath, 'mods');
@@ -88,9 +126,10 @@ async function syncMods(manifestUrl, rootPath, onProgress) {
 
 // Функция для запуска игры
 async function startGame(profile, options, onProgress) {
+    const authorization = await Authenticator.getAuth(options.nickname, options.sessionToken);
     const opts = {
         javaPath: options.javaPath,
-        authorization: await Authenticator.getAuth(options.nickname),
+        authorization: authorization,
         root: options.rootPath,
         version: {
             number: profile.minecraftVersion,
@@ -105,7 +144,10 @@ async function startGame(profile, options, onProgress) {
             width: options.window.width,
             height: options.window.height,
             fullscreen: options.fullscreen
-        }
+        },
+        customArgs: [
+            "-javaagent:"+options.authLibPath+"=https://auth.hatchup.ru"
+        ]
     };
     if (options.autoConnect) {
         opts.quickPlay = {
@@ -139,4 +181,4 @@ async function startGame(profile, options, onProgress) {
     });
 }
 
-export { ensureForgeInstaller, startGame, syncMods };
+export { ensureForgeInstaller, ensureAuthLib, startGame, syncMods };

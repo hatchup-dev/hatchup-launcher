@@ -364,6 +364,11 @@ footer {
     color: var(--text-color-muted);
     min-height: 20px;
 }
+#login-status-text {
+    color: var(--text-color-muted);
+    min-height: 20px;
+    text-align: center;
+}
 
 .progress-bar-container {
     background-color: var(--input-background);
@@ -619,4 +624,104 @@ input[type="checkbox"] {
 .server-logo-container {
     position: relative; /* Обязательно для позиционирования дочерних элементов */
     display: inline-block; /* Чтобы контейнер был по размеру логотипа */
+}
+.view {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 15px;
+}
+.view.hidden {
+    display: none;
+}
+
+/* Кнопка входа через Discord */
+.discord-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 15px;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #5865F2; /* Фирменный цвет Discord */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.discord-button:hover {
+    background-color: #4752C4;
+}
+
+.discord-button img {
+    width: 24px;
+    height: 24px;
+    margin-right: 12px;
+}
+
+
+/* Текст "Добро пожаловать!" */
+#register-view p:first-of-type {
+    font-size: 1.1em;
+    color: #e0e0e0;
+    margin-bottom: 20px;
+}
+
+/* Переопределяем стили для input-bar внутри register-view */
+#register-view .input-bar {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 0;
+}
+
+#register-view .input-bar input {
+    flex-grow: 1;
+    padding: 12px;
+    border-radius: 5px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border: 1px solid var(--border-color);
+    background-color: var(--input-background);
+    color: var(--text-color);
+    font-size: 1.1em;
+    text-align: center;
+}
+
+/* Кнопка "Сохранить и войти" */
+#register-button {
+    padding: 10px 20px;
+    font-size: 1em;
+    font-weight: bold;
+    color: #ffffff;
+    background: linear-gradient(45deg, #28a745, #218838); /* Зеленый градиент */
+    border: none;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap; /* Чтобы текст не переносился */
+    height: 100%;
+}
+
+#register-button:hover {
+    background: linear-gradient(45deg, #218838, #1e7e34);
+    box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+}
+
+#register-button:disabled {
+    background: #555;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Текст для вывода ошибок */
+#register-error-text {
+    margin-top: 15px;
+    color: #e74c3c;
+    min-height: 18px; /* Резервируем место, чтобы интерфейс не прыгал */
 }
