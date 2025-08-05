@@ -4,15 +4,85 @@
 <head>
     <meta charset="UTF-8">
     <title>HATCHUP Launcher</title>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; 
-                   script-src 'self' 'unsafe-eval'; 
-                   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
-                   font-src 'self' https://fonts.gstatic.com; 
-                   img-src 'self' data:;
-                   connect-src 'self' ws:;">
 </head>
 
 <body>
+    <div id="profile-modal" class="modal-backdrop hidden">
+
+        <!-- Основной контейнер, стилизованный под интерфейс Minecraft -->
+        <div class="profile-container minecraft-ui">
+
+            <!-- === ЗАГОЛОВОК ОКНА === -->
+            <div class="profile-header">
+                <!-- Вкладки "Инвентарь" и "Статистика" -->
+                <div class="tabs">
+                    <button id="tab-button-inventory" class="tab active" data-tab="inventory">Инвентарь</button>
+                    <button id="tab-button-stats" class="tab" data-tab="stats">Статистика</button>
+                </div>
+                <!-- Кнопки управления окном (Выход, Закрыть) -->
+                <div class="profile-actions">
+                    <button id="profile-logout-button" class="icon-button" title="Выйти из аккаунта">
+                        <img id="profile-logout-icon" src="" alt="Logout" class="icon-svg">
+                    </button>
+                    <button id="profile-close-button" class="icon-button" title="Закрыть">
+                        <img id="profile-close-icon" src="" alt="Close" class="icon-svg">
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================================== -->
+            <!-- ===== ВКЛАДКА "ИНВЕНТАРЬ" ===== -->
+            <!-- ================================== -->
+            <div id="tab-content-inventory" class="tab-content active">
+
+                <!-- ИСПРАВЛЕННАЯ ЛЕВАЯ КОЛОНКА: теперь это контейнер для брони и скина -->
+                <div class="profile-left">
+                    <!-- Контейнер для слотов брони -->
+                    <div id="armor-slots" class="item-slots-vertical"></div>
+
+                    <!-- Контейнер для 3D-скина -->
+                    <div class="skin-viewer-container">
+                        <canvas id="skin-viewer"></canvas>
+                        <button id="change-skin-button" class="floating-button">Изменить скин</button>
+                    </div>
+                </div>
+
+                <!-- Правая колонка (остается без изменений) -->
+                <div class="profile-right">
+                    <div class="player-info">
+                        <span id="info-nickname" class="nickname-text">Nickname</span>
+                        <span id="info-stats-short">Загрузка данных...</span>
+                        <span id="info-coords"></span>
+                        <div id="health-bar" class="health-bar"></div>
+                        <div id="food-bar" class="food-bar"></div>
+                    </div>
+
+                    <button id="refresh-data-button" class="icon-button refresh-button" title="Обновить информацию">
+                        <img id="refresh-icon" src="" alt="Refresh" class="icon-svg">
+                    </button>
+
+                    <div class="inventory-container">
+                        <div id="inventory-main" class="item-slots-grid main"></div>
+                        <div id="inventory-hotbar" class="item-slots-grid hotbar"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =================================== -->
+            <!-- ===== ВКЛАДКА "СТАТИСТИКА" ===== -->
+            <!-- =================================== -->
+            <div id="tab-content-stats" class="tab-content">
+                <div class="stats-container">
+                    <h2>Общая статистика</h2>
+                    <ul id="stats-general-list" class="stats-list">
+                        <!-- Сюда JS добавит статистику -->
+                    </ul>
+                    <!-- В будущем можно добавить другие категории -->
+                </div>
+            </div>
+            <span class="profile-infotext">Информация обновляется при выходе с сервера</span>
+        </div>
+    </div>
     <div class="title-bar">
         <!-- Центральная часть с иконкой и названием -->
         <div class="title-center">
@@ -144,8 +214,8 @@
                     <button id="folder-button" class="icon-button" title="Открыть папку Minecraft">
                         <img id="folder-icon-img" src="" draggable="false" alt="Open Folder" class="icon-svg">
                     </button>
-                    <button id="logout-button" class="icon-button" title="Сменить аккаунт">
-                        <img id="logout-icon-img" src="" draggable="false" alt="Logout" class="icon-svg">
+                    <button id="profile-button" class="icon-button" title="Профиль игрока">
+                        <img id="profile-icon-img" src="" draggable="false" alt="Profile" class="icon-svg">
                     </button>
                 </div>
                 <div class="play-button-container">

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, shell, dialog, session } from 'electron';
 import path from 'path';
 import os from 'os';
 import Store from 'electron-store';
@@ -9,6 +9,7 @@ import { updateElectronApp } from 'update-electron-app';
 import http from 'http';
 import url from 'url';
 import fs from 'fs'
+import FormData from 'form-data';
 import RPC from 'discord-rpc';
 import { v4 as uuidv4 } from 'uuid';
 if (require('electron-squirrel-startup')) {
@@ -36,6 +37,7 @@ const HATCHUP_CREATE_PROFILE = {
 const clientId = '1400609868129374328';
 const rpc = new RPC.Client({ transport: 'ipc' });
 
+let iconCache = {};
 let rpcReady = false;
 let inGame = false;
 let onlinePlayers = 0;
@@ -85,6 +87,20 @@ function updateRPC() {
 
     rpc.setActivity(activity).catch(console.error);
 }
+function loadIconCache() {
+    const cachePath = path.join(ROOT_PATH, 'launcher_data', 'icons.json');
+    try {
+        if (fs.existsSync(cachePath)) {
+            const data = fs.readFileSync(cachePath, 'utf8');
+            iconCache = JSON.parse(data);
+            console.log(`Icon cache loaded. Found ${Object.keys(iconCache).length} icons.`);
+        } else {
+            console.log('Icon cache not found. It will be generated on next game launch.');
+        }
+    } catch (error) {
+        console.error('Failed to load icon cache:', error);
+    }
+}
 function setGameState(newInGameStatus) {
     if (inGame === newInGameStatus) return;
 
@@ -118,8 +134,8 @@ rpc.on('ready', () => {
 // Запускаем первую попытку подключения
 connectToDiscord();
 
-const DISCORD_CLIENT_ID = clientId; 
-const AUTH_BACKEND_URL = 'https://auth.hatchup.ru'; 
+const DISCORD_CLIENT_ID = clientId;
+const AUTH_BACKEND_URL = 'https://auth.hatchup.ru';
 
 function startDiscordAuth() {
     const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=http%3A%2F%2Flocalhost%3A53135%2Fcallback&response_type=code&scope=identify%20guilds`;
@@ -139,8 +155,8 @@ function createAuthServer() {
             mainWindow.webContents.send('discord-auth-code', code);
         } else {
             // Если зашли без кода, это ошибка
-             res.writeHead(400, { 'Content-Type': 'text/html; charset=utf-8' });
-             res.end('<h1>Некорректный запрос.</h1>');
+            res.writeHead(400, { 'Content-Type': 'text/html; charset=utf-8' });
+            res.end('<h1>Некорректный запрос.</h1>');
         }
     }).listen(53135, '127.0.0.1');
 }
@@ -231,6 +247,34 @@ function getRamConfiguration() {
         default: defaultRam, // Наше расчетное значение по умолчанию
     };
 }
+function createMapWindow(mapUrl) {
+    // Проверяем, не открыто ли уже окно карты, чтобы избежать дублирования
+    let mapWindow = BrowserWindow.getAllWindows().find(w => w.getTitle() === 'Веб-карта');
+    if (mapWindow) {
+        mapWindow.loadURL(mapUrl);
+        mapWindow.focus();
+        return;
+    }
+    
+    mapWindow = new BrowserWindow({
+        width: 1280,
+        height: 720,
+        title: 'Веб-карта',
+        icon: path.join(__dirname, 'assets', 'icon.ico'),
+        webPreferences: {
+            preload: null
+        }
+    });
+
+    // Загружаем URL карты
+    mapWindow.loadURL(mapUrl);
+
+    // Можно оставить стандартное меню для навигации (Назад, Вперед, Обновить)
+    mapWindow.setMenu(null);
+}
+ipcMain.on('open-map-window', (event, url) => {
+    createMapWindow(url);
+});
 ipcMain.on('renderer-ready', () => {
     console.log('Received renderer-ready signal. Showing main window.');
     if (loadingWindow) {
@@ -244,16 +288,34 @@ ipcMain.on('renderer-ready', () => {
         setInterval(checkServerStatus, 30000);
     }
 });
+
 app.on('ready', () => {
     updateElectronApp({
-        repo: 'hatchup-dev/hatchup-launcher', 
+        repo: 'hatchup-dev/hatchup-launcher',
         updateInterval: '1 hour'
     });
+    loadIconCache();
     createAuthServer();
     createLoadingWindow();
     createWindow();
 });
-
+app.whenReady().then(() => {
+    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+        callback({
+            responseHeaders: {
+                ...details.responseHeaders,
+                'Content-Security-Policy': [
+                    "script-src 'self' 'unsafe-eval';",
+                    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;",
+                    "font-src 'self' https://fonts.gstatic.com;",
+                    "img-src 'self' data: https://auth.hatchup.ru;",
+                    "connect-src 'self' ws: https://auth.hatchup.ru;",
+                    "default-src 'self';"
+                ].join(' ')
+            }
+        });
+    });
+});
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit();
@@ -267,6 +329,44 @@ app.on('activate', () => {
 });
 ipcMain.on('start-discord-auth', () => {
     startDiscordAuth();
+});
+ipcMain.handle('get-item-icon', (event, itemId) => {
+    return iconCache[itemId] || null; // Возвращаем Base64 или null
+});
+ipcMain.handle('open-skin-dialog', async () => {
+    const result = await dialog.showOpenDialog(mainWindow, {
+        title: 'Выберите файл скина',
+        filters: [{ name: 'Изображения', extensions: ['png'] }],
+        properties: ['openFile']
+    });
+
+    if (result.canceled || result.filePaths.length === 0) {
+        return null; // Пользователь отменил выбор
+    } else {
+        return result.filePaths[0]; // Возвращаем путь к выбранному файлу
+    }
+});
+ipcMain.handle('upload-skin', async (event, { filePath, uuid, sessionToken }) => {
+    const form = new FormData();
+    form.append('uuid', uuid);
+    form.append('sessionToken', sessionToken);
+    form.append('skin', fs.createReadStream(filePath));
+    try {
+        // 4. Отправляем запрос
+        const response = await fetch(`${AUTH_BACKEND_URL}/skins/upload`, {
+            method: 'POST',
+            body: form,
+            // 5. Передаем заголовки, сгенерированные библиотекой form-data.
+            //    Они будут содержать правильный Content-Type: multipart/form-data; boundary=...
+            headers: form.getHeaders(),
+        });
+
+        return await response.json();
+
+    } catch (error) {
+        console.error('Failed to upload skin:', error);
+        return { status: 'error', error: 'Failed to read file or contact server.' };
+    }
 });
 ipcMain.handle('process-discord-auth', async (event, code) => {
     try {
@@ -318,12 +418,12 @@ ipcMain.handle('register-nickname', async (event, data) => {
         });
         const responseData = await response.json();
         // Добавляем статус ответа, чтобы renderer мог понять, был ли запрос успешным
-        responseData.httpStatus = response.status; 
+        responseData.httpStatus = response.status;
         return responseData;
     } catch (error) {
         console.error("Error registering nickname:", error);
-        return { 
-            status: 'error', 
+        return {
+            status: 'error',
             message: 'Не удалось связаться с сервером регистрации.',
             httpStatus: 500
         };
@@ -458,6 +558,35 @@ ipcMain.handle('get-store-value', (event, key) => {
 });
 ipcMain.handle('set-store-value', (event, { key, value }) => {
     store.set(key, value);
+});
+ipcMain.handle('get-player-data', async (event, { uuid, token }) => {
+    try {
+        const response = await fetch(`${AUTH_BACKEND_URL}/playerdata/${uuid}`, {
+            headers: {
+                // Отправляем токен сессии для авторизации
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        const playerData = await response.json();
+        const textureProperty = playerData.properties?.find(p => p.name === 'textures');
+        if (textureProperty) {
+            try {
+                // Buffer доступен в main процессе "из коробки"
+                const decodedValue = Buffer.from(textureProperty.value, 'base64').toString('utf8');
+                const textureData = JSON.parse(decodedValue);
+
+                // Добавляем новый, удобный ключ в наш объект
+                playerData.decodedTextures = textureData;
+            } catch (e) {
+                console.error("Failed to decode texture property:", e);
+                playerData.decodedTextures = null;
+            }
+        }
+        return playerData;
+    } catch (error) {
+        console.error("Error fetching player data:", error);
+        return { status: 'error', message: 'Не удалось связаться с сервером.' };
+    }
 });
 ipcMain.on('open-game-folder', () => {
     shell.openPath(ROOT_PATH);

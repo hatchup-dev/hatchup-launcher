@@ -14,6 +14,13 @@
     font-weight: 700;
     src: url('./assets/fonts/roboto-v48-cyrillic_latin-700.woff2') format('woff2');
 }
+@font-face {
+    font-display: swap;
+    font-family: 'MinecraftRus';
+    font-style: normal;
+    font-weight: 1000;
+    src: url('./assets/fonts/minecraft.ttf') format('TrueType');
+}
 
 /* --- Глобальные стили и переменные --- */
 
@@ -37,6 +44,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    
 }
 
 body {
@@ -725,3 +733,304 @@ input[type="checkbox"] {
     color: #e74c3c;
     min-height: 18px; /* Резервируем место, чтобы интерфейс не прыгал */
 }
+/* ====================================================== */
+/* ===== НАЧАЛО БЛОКА СТИЛЕЙ ДЛЯ ОКНА ПРОФИЛЯ ИГРОКА ===== */
+/* ====================================================== */
+
+/* Фон-затемнение для модального окна */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.modal-backdrop.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Общий контейнер в стиле UI Minecraft */
+.minecraft-ui {
+    background-color: rgba(30,30,30,0.5);
+    border: 4px solid #101010;
+    border-top-color: #515151;
+    border-left-color: #515151;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    /* Если вы добавите пиксельный шрифт, укажите его здесь */
+    font-family: 'MinecraftRus', sans-serif; 
+    image-rendering: pixelated; /* Для четких пиксельных текстур */
+}
+
+/* Основной контейнер профиля */
+.profile-container {
+    width: 720px;
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 10px;
+}
+
+/* --- Заголовок с табами и кнопками --- */
+.profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    background-color: rgba(49,49,49,0.7);
+    border-bottom: 4px solid #101010;
+}
+.tabs {
+    display: flex;
+}
+.tabs button {
+    background-color: #515151;
+    border: 2px solid #101010;
+    color: #DDDDDD;
+    padding: 5px 15px;
+    margin-right: -2px; /* Наложение рамок */
+    cursor: pointer;
+    font-family: inherit;
+}
+.tabs button.active {
+    background-color: #1E1E1E;
+    border-bottom: 2px solid #1E1E1E; /* "Вдавленный" эффект */
+    position: relative;
+}
+.profile-actions {
+    display: flex;
+}
+.profile-actions .icon-button {
+    margin-left: 5px;
+}
+.profile-actions .icon-button img {
+    width: 20px;
+    height: 20px;
+}
+
+/* --- Содержимое вкладок --- */
+.tab-content { display: none; }
+.tab-content.active {
+    display: flex;
+    flex-grow: 1;
+    padding: 15px;
+    gap: 15px;
+    overflow: auto;
+}
+.profile-infotext{
+    position: relative;
+    padding: 10px;
+    font-size: 0.7em;
+    text-align: right;
+}
+/* --- Левая колонка (Броня + Скин) --- */
+.profile-left {
+    display: flex;
+    gap: 10px; /* Расстояние между броней и скином */
+    flex-shrink: 0;
+}
+.skin-viewer-container {
+    position: relative;
+    width: 180px;
+    height: 100%;
+    background-color: rgba(0,0,0,0.3);
+    border: 2px solid #101010;
+}
+#skin-viewer {
+    width: 100%;
+    height: 100%;
+}
+
+.floating-button {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(81, 81, 81, 0.8);
+    border: 2px solid #101010;
+    color: #DDDDDD;
+    padding: 5px 10px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s;
+    font-family: inherit;
+}
+.skin-viewer-container:hover .floating-button {
+    opacity: 1;
+}
+
+/* --- Правая колонка (Инфо и инвентарь) --- */
+.profile-right {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+.player-info {
+    color: #DDDDDD;
+}
+.nickname-text {
+    font-size: 24px;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+    text-shadow: 2px 2px #3f3f3f;
+}
+#info-stats-short, #info-coords {
+    font-size: 12px;
+    display: block;
+    line-height: 1.4;
+}
+.refresh-button {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+.refresh-button img {
+    width: 20px;
+    height: 20px;
+}
+
+.health-bar, .food-bar {
+    display: flex;
+    gap: 1px;
+    margin-top: 8px;
+}
+.health-bar img, .food-bar img {
+    width: 18px;
+    height: 18px;
+}
+
+/* --- Сетки для предметов --- */
+
+/* Контейнер для вертикальных слотов (броня) */
+.item-slots-vertical {
+    display: grid;
+    grid-template-rows: repeat(4, 1fr);
+    gap: 5px;
+    width: 52px;
+    height: 52px;
+}
+
+/* Контейнер для всего инвентаря в правой колонке */
+.inventory-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-top: auto; /* Прижимает инвентарь к низу */
+}
+
+/* Общая сетка для инвентаря и хотбара */
+.item-slots-grid {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    gap: 4px;
+}
+.item-slots-grid.main {
+    grid-template-rows: repeat(3, 1fr);
+    margin-bottom: 4px;
+}
+.item-slots-grid.hotbar {
+    grid-template-rows: 1fr;
+}
+
+/* Стили для одного слота */
+.item-slot {
+    width: 100%;
+    padding-bottom: 100%; /* Сохраняет квадратную форму */
+    position: relative;
+    background-color: #8B8B8B;
+    border: 2px solid #373737;
+    border-top-color: #101010;
+    border-left-color: #101010;
+    cursor: help;
+}
+
+/* Иконка предмета */
+.item-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 32px;
+    height: 32px;
+    image-rendering: pixelated;
+}
+
+/* Количество предметов */
+.item-count {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    text-shadow: 2px 2px #3f3f3f;
+}
+
+/* Tooltip для предмета */
+.item-tooltip {
+    position: fixed;
+    background: rgba(16, 0, 16, 0.9);
+    border: 2px solid #5000FF;
+    padding: 8px;
+    color: white;
+    font-family: 'MinecraftRus', sans-serif;
+    font-size: 14px;
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.1s;
+    visibility: hidden;
+    white-space: pre-wrap;
+
+}
+.item-tooltip.visible {
+    opacity: 1;
+    visibility: visible;
+}
+.stats-container {
+    width: 100%;
+    color: #DDDDDD;
+    padding: 10px;
+    overflow: auto;
+}
+.stats-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.stats-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #313131;
+}
+.stats-list li .stat-name {
+    color: #AAAAAA;
+}
+.stats-list li .stat-value {
+    color: #FFFFFF;
+    font-weight: bold;
+}
+#coords-link {
+    color: #55FFFF; /* Голубой, как в чате Minecraft */
+    text-decoration: none;
+    cursor: pointer;
+}
+#coords-link:hover {
+    text-decoration: underline;
+}
+/* ==================================================== */
+/* ===== КОНЕЦ БЛОКА СТИЛЕЙ ДЛЯ ОКНА ПРОФИЛЯ ИГРОКА ===== */
+/* ==================================================== */

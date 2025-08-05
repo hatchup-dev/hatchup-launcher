@@ -11,6 +11,8 @@ contextBridge.exposeInMainWorld('api', {
     // --- ФУНКЦИИ, СВЯЗАННЫЕ С ИГРОЙ ---
     launchGame: (args) => ipcRenderer.invoke('launch-game', args),
     openGameFolder: () => ipcRenderer.send('open-game-folder'),
+    getPlayerData: (uuid, token) => ipcRenderer.invoke('get-player-data', { uuid, token }),
+    getItemIcon: (itemId) => ipcRenderer.invoke('get-item-icon', itemId),
 
     // --- ФУНКЦИИ, СВЯЗАННЫЕ С АВТОРИЗАЦИЕЙ (НОВЫЕ) ---
     startDiscordAuth: () => ipcRenderer.send('start-discord-auth'),
@@ -18,6 +20,8 @@ contextBridge.exposeInMainWorld('api', {
     registerNickname: (data) => ipcRenderer.invoke('register-nickname', data), 
     verifySession: (token) => ipcRenderer.invoke('verify-session', token),
     logout: (token) => ipcRenderer.invoke('logout', token),
+    openSkinDialog: () => ipcRenderer.invoke('open-skin-dialog'),
+    uploadSkin: (data) => ipcRenderer.invoke('upload-skin', data),
 
     // --- ФУНКЦИИ ДЛЯ РАБОТЫ С НАСТРОЙКАМИ ---
     getStoreValue: (key) => ipcRenderer.invoke('get-store-value', key),
@@ -28,6 +32,7 @@ contextBridge.exposeInMainWorld('api', {
     minimizeWindow: () => ipcRenderer.send('minimize-window'),
     restoreWindow: () => ipcRenderer.send('restore-window'),
     closeWindow: () => ipcRenderer.send('close-window'),
+    openMapWindow: (url) => ipcRenderer.send('open-map-window', url),
 
     // --- ОБРАБОТЧИКИ СОБЫТИЙ ОТ ГЛАВНОГО ПРОЦЕССА ---
     
