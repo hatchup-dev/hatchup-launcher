@@ -14,6 +14,7 @@
     font-weight: 700;
     src: url('./assets/fonts/roboto-v48-cyrillic_latin-700.woff2') format('woff2');
 }
+
 @font-face {
     font-display: swap;
     font-family: 'MinecraftRus';
@@ -44,7 +45,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    
+
 }
 
 body {
@@ -240,21 +241,25 @@ main {
     border-color: #4752C4;
     transition: all 0.3s ease;
 }
+
 .server-logo-container:hover .server-logo {
     transform: scale(1.25);
     opacity: 0.25;
     box-shadow: 0 0 10px 5px #48abe0,
         0 0 10px 5px #5865F2;
 }
+
 .server-logo-container:hover .server-status-short {
-    opacity: 0; 
-    transform: translate(20px,20px);
+    opacity: 0;
+    transform: translate(20px, 20px);
 }
+
 .server-logo-container:hover .server-tooltip {
     opacity: 1;
     visibility: visible;
 }
-.server-logo-container:hover ~ .server-description {
+
+.server-logo-container:hover~.server-description {
     transform: translateY(100%);
 }
 
@@ -372,6 +377,7 @@ footer {
     color: var(--text-color-muted);
     min-height: 20px;
 }
+
 #login-status-text {
     color: var(--text-color-muted);
     min-height: 20px;
@@ -554,8 +560,14 @@ input[type="checkbox"] {
     background-color: #95a5a6;
     transition: background-color 0.3s;
 }
-.status-indicator.online { background-color: #2ecc71; }
-.status-indicator.offline { background-color: #e74c3c; }
+
+.status-indicator.online {
+    background-color: #2ecc71;
+}
+
+.status-indicator.offline {
+    background-color: #e74c3c;
+}
 
 .server-tooltip {
     position: absolute;
@@ -563,10 +575,12 @@ input[type="checkbox"] {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(30, 30, 30, 0.2); /* Полупрозрачный фон */
-    
-    border-radius: 15px; /* Такое же скругление, как у лого */
-    
+    background-color: rgba(30, 30, 30, 0.2);
+    /* Полупрозрачный фон */
+
+    border-radius: 15px;
+    /* Такое же скругление, как у лого */
+
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -574,27 +588,32 @@ input[type="checkbox"] {
     text-align: center;
     padding: 20px;
     box-sizing: border-box;
-    
+
     /* Анимация плавного появления */
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
     z-index: 20;
 }
-.server-tooltip h3 { /* Название сервера */
+
+.server-tooltip h3 {
+    /* Название сервера */
     margin: 0;
     color: #fff;
-    font-size: 1.5em; /* Крупнее */
+    font-size: 1.5em;
+    /* Крупнее */
     font-weight: bold;
 }
 
-.server-tooltip #tooltip-description { /* MOTD */
+.server-tooltip #tooltip-description {
+    /* MOTD */
     margin: 5px 0 15px 0;
     color: #ccc;
     font-size: 0.7em;
 }
 
-.server-tooltip .tooltip-online-info { /* Блок с онлайном */
+.server-tooltip .tooltip-online-info {
+    /* Блок с онлайном */
     background-color: rgba(0, 0, 0, 0.5);
     padding: 5px 15px;
     border-radius: 20px;
@@ -602,7 +621,8 @@ input[type="checkbox"] {
     margin-bottom: 15px;
 }
 
-.server-tooltip .tooltip-player-list-container { /* Блок со списком игроков */
+.server-tooltip .tooltip-player-list-container {
+    /* Блок со списком игроков */
     width: 100%;
 }
 
@@ -615,7 +635,8 @@ input[type="checkbox"] {
     list-style: none;
     padding: 0;
     margin: 5px 0 0 0;
-    max-height: 80px; /* Ограничиваем высоту */
+    max-height: 80px;
+    /* Ограничиваем высоту */
     overflow-y: auto;
     font-size: 0.9em;
     color: #ddd;
@@ -625,14 +646,19 @@ input[type="checkbox"] {
 #tooltip-player-list::-webkit-scrollbar {
     width: 4px;
 }
+
 #tooltip-player-list::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.3);
     border-radius: 4px;
 }
+
 .server-logo-container {
-    position: relative; /* Обязательно для позиционирования дочерних элементов */
-    display: inline-block; /* Чтобы контейнер был по размеру логотипа */
+    position: relative;
+    /* Обязательно для позиционирования дочерних элементов */
+    display: inline-block;
+    /* Чтобы контейнер был по размеру логотипа */
 }
+
 .view {
     display: flex;
     flex-direction: column;
@@ -640,6 +666,7 @@ input[type="checkbox"] {
     align-items: center;
     gap: 15px;
 }
+
 .view.hidden {
     display: none;
 }
@@ -654,7 +681,8 @@ input[type="checkbox"] {
     font-size: 1.2em;
     font-weight: bold;
     color: #ffffff;
-    background-color: #5865F2; /* Фирменный цвет Discord */
+    background-color: #5865F2;
+    /* Фирменный цвет Discord */
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -706,13 +734,15 @@ input[type="checkbox"] {
     font-size: 1em;
     font-weight: bold;
     color: #ffffff;
-    background: linear-gradient(45deg, #28a745, #218838); /* Зеленый градиент */
+    background: linear-gradient(45deg, #28a745, #218838);
+    /* Зеленый градиент */
     border: none;
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
     cursor: pointer;
     transition: all 0.2s ease;
-    white-space: nowrap; /* Чтобы текст не переносился */
+    white-space: nowrap;
+    /* Чтобы текст не переносился */
     height: 100%;
 }
 
@@ -731,8 +761,10 @@ input[type="checkbox"] {
 #register-error-text {
     margin-top: 15px;
     color: #e74c3c;
-    min-height: 18px; /* Резервируем место, чтобы интерфейс не прыгал */
+    min-height: 18px;
+    /* Резервируем место, чтобы интерфейс не прыгал */
 }
+
 /* ====================================================== */
 /* ===== НАЧАЛО БЛОКА СТИЛЕЙ ДЛЯ ОКНА ПРОФИЛЯ ИГРОКА ===== */
 /* ====================================================== */
@@ -754,6 +786,7 @@ input[type="checkbox"] {
     visibility: visible;
     transition: opacity 0.3s ease, visibility 0.3s ease;
 }
+
 .modal-backdrop.hidden {
     opacity: 0;
     visibility: hidden;
@@ -761,20 +794,50 @@ input[type="checkbox"] {
 
 /* Общий контейнер в стиле UI Minecraft */
 .minecraft-ui {
-    background-color: rgba(30,30,30,0.5);
+    background-color: rgba(30, 30, 30, 0.5);
     border: 4px solid #101010;
     border-top-color: #515151;
     border-left-color: #515151;
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     /* Если вы добавите пиксельный шрифт, укажите его здесь */
-    font-family: 'MinecraftRus', sans-serif; 
-    image-rendering: pixelated; /* Для четких пиксельных текстур */
+    font-family: 'MinecraftRus', sans-serif;
+    image-rendering: pixelated;
+    /* Для четких пиксельных текстур */
+}
+.minecraft-ui ::-webkit-scrollbar {
+    width: 12px;  /* Ширина вертикального скроллбара */
+    height: 12px; /* Высота горизонтального скроллбара */
 }
 
+/* Фон (дорожка) скроллбара */
+.minecraft-ui ::-webkit-scrollbar-track {
+    background: #1E1E1E; /* Темный фон, как в игре */
+    border: 2px solid #101010;
+    border-top-color: #515151;
+    border-left-color: #515151;
+}
+
+/* Сам ползунок скроллбара */
+.minecraft-ui ::-webkit-scrollbar-thumb {
+    background: #8B8B8B; /* Серый цвет, как у слотов */
+    border: 2px solid #373737;
+    border-top-color: #101010;
+    border-left-color: #101010;
+}
+
+/* Ползунок при наведении на него курсора */
+.minecraft-ui ::-webkit-scrollbar-thumb:hover {
+    background: #A0A0A0; /* Чуть светлее при наведении */
+}
+
+/* Уголок, где пересекаются вертикальный и горизонтальный скроллбары */
+.minecraft-ui ::-webkit-scrollbar-corner {
+    background: transparent; /* Делаем его невидимым */
+}
 /* Основной контейнер профиля */
 .profile-container {
     width: 720px;
-    height: 400px;
+    height: 480px;
     display: flex;
     flex-direction: column;
     border-radius: 10px;
@@ -786,39 +849,50 @@ input[type="checkbox"] {
     justify-content: space-between;
     align-items: center;
     padding: 8px;
-    background-color: rgba(49,49,49,0.7);
+    background-color: rgba(49, 49, 49, 0.7);
     border-bottom: 4px solid #101010;
 }
+
 .tabs {
     display: flex;
 }
+
 .tabs button {
     background-color: #515151;
     border: 2px solid #101010;
     color: #DDDDDD;
     padding: 5px 15px;
-    margin-right: -2px; /* Наложение рамок */
+    margin-right: -2px;
+    /* Наложение рамок */
     cursor: pointer;
     font-family: inherit;
 }
+
 .tabs button.active {
     background-color: #1E1E1E;
-    border-bottom: 2px solid #1E1E1E; /* "Вдавленный" эффект */
+    border-bottom: 2px solid #1E1E1E;
+    /* "Вдавленный" эффект */
     position: relative;
 }
+
 .profile-actions {
     display: flex;
 }
+
 .profile-actions .icon-button {
     margin-left: 5px;
 }
+
 .profile-actions .icon-button img {
     width: 20px;
     height: 20px;
 }
 
 /* --- Содержимое вкладок --- */
-.tab-content { display: none; }
+.tab-content {
+    display: none;
+}
+
 .tab-content.active {
     display: flex;
     flex-grow: 1;
@@ -826,25 +900,29 @@ input[type="checkbox"] {
     gap: 15px;
     overflow: auto;
 }
-.profile-infotext{
+
+.profile-infotext {
     position: relative;
     padding: 10px;
     font-size: 0.7em;
     text-align: right;
 }
+
 /* --- Левая колонка (Броня + Скин) --- */
 .profile-left {
     display: flex;
-    gap: 10px; /* Расстояние между броней и скином */
+    gap: 10px;
+    /* Расстояние между броней и скином */
     flex-shrink: 0;
 }
+
 .skin-viewer-container {
     position: relative;
     width: 180px;
     height: 100%;
-    background-color: rgba(0,0,0,0.3);
-    border: 2px solid #101010;
+    background-color: rgba(0, 0, 0, 0.2);
 }
+
 #skin-viewer {
     width: 100%;
     height: 100%;
@@ -864,6 +942,7 @@ input[type="checkbox"] {
     transition: opacity 0.2s;
     font-family: inherit;
 }
+
 .skin-viewer-container:hover .floating-button {
     opacity: 1;
 }
@@ -875,9 +954,11 @@ input[type="checkbox"] {
     flex-direction: column;
     position: relative;
 }
+
 .player-info {
     color: #DDDDDD;
 }
+
 .nickname-text {
     font-size: 24px;
     font-weight: bold;
@@ -885,31 +966,52 @@ input[type="checkbox"] {
     margin-bottom: 5px;
     text-shadow: 2px 2px #3f3f3f;
 }
-#info-stats-short, #info-coords {
+
+#info-stats-short,
+#info-coords {
     font-size: 12px;
     display: block;
     line-height: 1.4;
 }
+
 .refresh-button {
     position: absolute;
     top: 0;
     right: 0;
 }
+
 .refresh-button img {
     width: 20px;
     height: 20px;
 }
 
-.health-bar, .food-bar {
+.bar-container {
     display: flex;
-    gap: 1px;
-    margin-top: 8px;
-}
-.health-bar img, .food-bar img {
-    width: 18px;
-    height: 18px;
+    justify-content: space-between;
 }
 
+.health-bar,
+.food-bar {
+    display: flex;
+    gap: 1px;
+    width: fit-content;
+    height: 20px;
+    border-radius: 2px;
+    object-fit: none;
+}
+
+.health-bar img,
+.food-bar img {
+    object-fit: cover;
+    width: 0%;
+    object-position: left;
+}
+.last-update {
+    padding: 10px;
+    padding-bottom: 0;
+    text-align: right;
+    font-size: 0.8em;
+}
 /* --- Сетки для предметов --- */
 
 /* Контейнер для вертикальных слотов (броня) */
@@ -918,7 +1020,6 @@ input[type="checkbox"] {
     grid-template-rows: repeat(4, 1fr);
     gap: 5px;
     width: 52px;
-    height: 52px;
 }
 
 /* Контейнер для всего инвентаря в правой колонке */
@@ -926,7 +1027,8 @@ input[type="checkbox"] {
     display: flex;
     flex-direction: column;
     width: 100%;
-    margin-top: auto; /* Прижимает инвентарь к низу */
+    margin-top: auto;
+    /* Прижимает инвентарь к низу */
 }
 
 /* Общая сетка для инвентаря и хотбара */
@@ -935,10 +1037,12 @@ input[type="checkbox"] {
     grid-template-columns: repeat(9, 1fr);
     gap: 4px;
 }
+
 .item-slots-grid.main {
     grid-template-rows: repeat(3, 1fr);
     margin-bottom: 4px;
 }
+
 .item-slots-grid.hotbar {
     grid-template-rows: 1fr;
 }
@@ -946,7 +1050,8 @@ input[type="checkbox"] {
 /* Стили для одного слота */
 .item-slot {
     width: 100%;
-    padding-bottom: 100%; /* Сохраняет квадратную форму */
+    padding-bottom: 100%;
+    /* Сохраняет квадратную форму */
     position: relative;
     background-color: #8B8B8B;
     border: 2px solid #373737;
@@ -995,42 +1100,52 @@ input[type="checkbox"] {
     white-space: pre-wrap;
 
 }
+
 .item-tooltip.visible {
     opacity: 1;
     visibility: visible;
 }
+
 .stats-container {
     width: 100%;
     color: #DDDDDD;
     padding: 10px;
     overflow: auto;
 }
+
 .stats-list {
     list-style: none;
     padding: 0;
     margin: 0;
 }
+
 .stats-list li {
     display: flex;
     justify-content: space-between;
     padding: 8px 0;
     border-bottom: 1px solid #313131;
 }
+
 .stats-list li .stat-name {
     color: #AAAAAA;
 }
+
 .stats-list li .stat-value {
     color: #FFFFFF;
     font-weight: bold;
 }
+
 #coords-link {
-    color: #55FFFF; /* Голубой, как в чате Minecraft */
+    color: #55FFFF;
+    /* Голубой, как в чате Minecraft */
     text-decoration: none;
     cursor: pointer;
 }
+
 #coords-link:hover {
     text-decoration: underline;
 }
+
 /* ==================================================== */
 /* ===== КОНЕЦ БЛОКА СТИЛЕЙ ДЛЯ ОКНА ПРОФИЛЯ ИГРОКА ===== */
 /* ==================================================== */

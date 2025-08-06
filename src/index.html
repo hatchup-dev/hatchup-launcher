@@ -53,8 +53,15 @@
                         <span id="info-nickname" class="nickname-text">Nickname</span>
                         <span id="info-stats-short">Загрузка данных...</span>
                         <span id="info-coords"></span>
-                        <div id="health-bar" class="health-bar"></div>
-                        <div id="food-bar" class="food-bar"></div>
+                        <div class="bar-container">
+                            <div id="health-bar" class="health-bar">
+                                <img id="health-bar-img" src="" alt="Здоровье">
+                            </div>
+                            <div id="food-bar" class="food-bar">
+                                <img id="food-bar-img" src="" alt="Голод">
+                            </div>
+                        </div>
+
                     </div>
 
                     <button id="refresh-data-button" class="icon-button refresh-button" title="Обновить информацию">
@@ -65,6 +72,7 @@
                         <div id="inventory-main" class="item-slots-grid main"></div>
                         <div id="inventory-hotbar" class="item-slots-grid hotbar"></div>
                     </div>
+                    
                 </div>
             </div>
 
@@ -80,6 +88,7 @@
                     <!-- В будущем можно добавить другие категории -->
                 </div>
             </div>
+            <span id="last-update" class="last-update">Загрузка данных...</span>
             <span class="profile-infotext">Информация обновляется при выходе с сервера</span>
         </div>
     </div>

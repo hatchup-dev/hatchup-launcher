@@ -6,12 +6,13 @@ import folderIconSrc from './assets/folder-icon.svg';
 import logoutIconSrc from './assets/logout-icon.svg';
 import closeIconSrc from './assets/close-icon.svg';
 import refreshIconSrc from './assets/refresh-icon.svg';
-import skinSrc from './assets/skin.png';
+import healthbarSrc from './assets/healthbar.png';
+import hungerbarSrc from './assets/hungerbar.png';
 import profileIconSrc from './assets/profile-icon.svg';
 import arrowLeftSrc from './assets/arrow-left.svg';
 import arrowRightSrc from './assets/arrow-right.svg';
 import discordLogoSrc from './assets/discord-logo.svg';
-import { SkinViewer } from 'skinview3d';
+import { SkinViewer, WalkingAnimation } from 'skinview3d';
 import './assets/background-day.png';
 import './assets/background-night.png';
 document.addEventListener('DOMContentLoaded', () => {
@@ -28,6 +29,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const arrowLeftImg = document.getElementById('arrow-left-img');
     const arrowRightImg = document.getElementById('arrow-right-img');
     const launcherLogoImg = document.getElementById('launcher-logo-img');
+    const healthBarImg = document.getElementById('health-bar-img');
+    const hungerBarImg = document.getElementById('food-bar-img');
 
     const profileButton = document.getElementById('profile-button');
     const profileModal = document.getElementById('profile-modal');
@@ -42,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabContentInventory = document.getElementById('tab-content-inventory');
     const tabContentStats = document.getElementById('tab-content-stats');
     const statsGeneralList = document.getElementById('stats-general-list');
+    const lastUpdateStats = document.getElementById('last-update');
 
     const loginView = document.getElementById('login-view');
     const gameView = document.getElementById('game-view');
@@ -87,6 +91,9 @@ document.addEventListener('DOMContentLoaded', () => {
     settingsIconImg.src = settingsIconSrc;
     serverLogoImg.src = serverLogoSrc;
     folderIconImg.src = folderIconSrc;
+    healthBarImg.src = healthbarSrc;
+    hungerBarImg.src = hungerbarSrc;
+
 
     document.getElementById('profile-icon-img').src = profileIconSrc;
     document.getElementById('profile-logout-icon').src = logoutIconSrc;
@@ -293,7 +300,17 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             infoCoords.appendChild(link);
-            infoStatsShort.textContent = `Здоровье: ${data.health || 'N/A'} / Еда: ${data.food || 'N/A'} / Уровень: ${data.xp_level || 'N/A'}`;
+            infoStatsShort.innerHTML = `Здоровье: <span style="font-size: 14px;color: rgb(253,19,20);">${data.health || 'N/A'}</span> / Еда: <span style="font-size: 14px;color: rgb(164,113,58);">${data.food || 'N/A'}</span> / Уровень: <span style="font-size: 14px;color: rgb(130,184,90);">${data.xp_level || 'N/A'}</span>`;
+            healthBarImg.style.width = data.health*5+"%";
+            hungerBarImg.style.width = data.food*5+"%";
+            if (data.last_updated){
+                const date = new Date(data.last_updated);  
+                const localTimeString = date.toLocaleString();
+                lastUpdateStats.innerHTML = `<span style="font-size: 12px;color: #8B8B8B;">Последнее обновление:</span> ${localTimeString}`;
+            } else {
+                lastUpdateStats.innerHTML = '';
+            }
+            
             // Отрисовываем инвентарь
             renderSlots(armorSlotsContainer, data.armor.reverse(), 4); // reverse(), т.к. броня хранится от ног к голове
             renderSlots(inventoryMainContainer, data.inventory.slice(9, 36), 27); // Основные 27 слотов
@@ -307,7 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     height: 250,
                 });
             }
-
+            skinViewer.animation = new WalkingAnimation();
 
             if (response.decodedTextures) {
                 // Если свойство есть, декодируем его и берем URL
@@ -336,6 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
             statusText.textContent = 'Данные обновлены.';
         } else {
             statusText.textContent = 'Не удалось загрузить данные игрока.';
+            lastUpdateStats.innerHTML = 'Не удалось загрузить данные игрока.';
             nicknameText.textContent = 'Не удалось загрузить данные игрока.';
             infoCoords.textContent = ``;
             infoStatsShort.textContent = ``;
