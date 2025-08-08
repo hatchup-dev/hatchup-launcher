@@ -344,6 +344,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.error('Failed to parse texture data:', e);
                     skinViewer.loadSkin("https://auth.hatchup.ru/storage/skins/default.png");
                 }
+
+                try {
+                    const capeUrl = response.decodedTextures.textures?.CAPE?.url;
+
+                    if (capeUrl) {
+                        console.log('Loading cape from URL:', capeUrl);
+                        skinViewer.loadCape(capeUrl);
+                    }
+                } catch (e) {
+                    console.error('Failed to parse texture data:', e);
+                    skinViewer.loadSkin("https://auth.hatchup.ru/storage/skins/default.png");
+                }
             } else {
                 // Если свойства "textures" нет вообще, показываем Стива
                 console.log('User has no texture property. Loading default.');
