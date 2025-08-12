@@ -29,7 +29,7 @@
     --primary-color: #5865F2;
     /* Синий */
     --primary-color-hover: #4752C4;
-    --background-color: rgba(30, 30, 30, 0.75);
+    --background-color: rgba(30, 30, 30, 0.6);
     --text-color: #e0e0e0;
     --text-color-muted: #b0b0b0;
     --border-color: #444;
@@ -54,6 +54,7 @@ body {
     color: var(--text-color);
     overflow: hidden;
     background-color: transparent;
+
 }
 
 .title-bar {
@@ -134,20 +135,19 @@ body {
     z-index: -1;
     background-size: cover;
     background-position: center;
-    transition: background-image 1s ease-in-out, transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: background-image 1s ease-in-out, transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.8s ease-in-out;
     transform: scale(1);
+    opacity: 0;
 }
 
 .background-image.zoomed {
     transform: scale(1.25);
 }
-
-.background-image.day {
-    background-image: url('./assets/background-day.png');
+.background-image.zoomed ~ .launcher-container{
+    backdrop-filter: blur(3px);
 }
-
-.background-image.night {
-    background-image: url('./assets/background-night.png');
+.background-image.active {
+    opacity: 1;
 }
 
 /* --- Основная сетка лаунчера --- */
@@ -158,6 +158,8 @@ body {
     padding: 20px;
     background-color: var(--background-color);
     padding-top: 40px;
+    transition: backdrop-filter 0.3s ease-in-out;
+    
 }
 
 /* --- Перекрашивание SVG в белый цвет --- */
@@ -171,27 +173,39 @@ header {
     justify-content: space-between;
     /* Размещает дочерние элементы по краям */
     align-items: center;
+    padding-top: 20px;
 }
 
 .logo-container {
     display: flex;
     align-items: center;
     gap: 20px;
-    /* Расстояние между лого и текстом */
+    font-family: 'MinecraftRus', sans-serif;
 }
 
 .logo-container img {
-    width: 80px;
-    height: 80px;
+    width: 60px;
+    height: 60px;
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+.logo-container img:hover {
+    transform: rotate(360deg) scale(1.5);
 }
 
 .launcher-title {
-    font-size: 1.8em;
-    font-weight: bold;
+    font-size: 1.5em;
     color: #fff;
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+    transform: translateX(-100px);
+    opacity: 0;
+    z-index: 1;
+    transition: all 0.2s;
 }
-
+.logo-container img:hover~.launcher-title {
+    transform: translateX(0);
+    opacity: 100;
+}
 
 /* --- Универсальный стиль для кнопок-иконок --- */
 .icon-button {
@@ -283,7 +297,7 @@ main {
     opacity: 0;
     transition: all 0.3s;
     user-select: none;
-    display: none;
+    z-index: 1;
 }
 
 .launcher-container:hover .carousel-arrow {

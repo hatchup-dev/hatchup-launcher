@@ -13,8 +13,18 @@ import arrowLeftSrc from './assets/arrow-left.svg';
 import arrowRightSrc from './assets/arrow-right.svg';
 import discordLogoSrc from './assets/discord-logo.svg';
 import { SkinViewer, WalkingAnimation } from 'skinview3d';
-import './assets/background-day.png';
-import './assets/background-night.png';
+
+import dayBg1 from './assets/background/day/1.png';
+import dayBg2 from './assets/background/day/2.png';
+import dayBg3 from './assets/background/day/3.png';
+import dayBg4 from './assets/background/day/4.png';
+
+import nightBg1 from './assets/background/night/1.png';
+import nightBg2 from './assets/background/night/2.png';
+import nightBg3 from './assets/background/night/3.png';
+import nightBg4 from './assets/background/night/4.png';
+
+
 document.addEventListener('DOMContentLoaded', () => {
     // --- Выборка DOM элементов ---
     const nicknameInput = document.getElementById('nickname');
@@ -22,7 +32,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const folderButton = document.getElementById('folder-button');
     const statusText = document.getElementById('status-text');
     const progressBar = document.getElementById('progress-bar');
-    const backgroundImage = document.getElementById('background-image');
+    const bg1 = document.getElementById('background-image-1');
+    const bg2 = document.getElementById('background-image-2');
+    const arrowLeft = document.getElementById('arrow-left');
+    const arrowRight = document.getElementById('arrow-right');
     const settingsIconImg = document.getElementById('settings-icon-img');
     const serverLogoImg = document.getElementById('server-logo-img');
     const folderIconImg = document.getElementById('folder-icon-img');
@@ -31,6 +44,46 @@ document.addEventListener('DOMContentLoaded', () => {
     const launcherLogoImg = document.getElementById('launcher-logo-img');
     const healthBarImg = document.getElementById('health-bar-img');
     const hungerBarImg = document.getElementById('food-bar-img');
+
+    const dayBackgrounds = [dayBg1, dayBg2, dayBg3, dayBg4];
+    const nightBackgrounds = [nightBg1, nightBg2, nightBg3, nightBg4];
+
+    let currentBackgrounds = [];
+    let currentIndex = 0;
+    let activeBgElement = bg1;
+
+    function changeBackground(newIndex) {
+        if (newIndex >= currentBackgrounds.length) {
+            newIndex = 0;
+        }
+        if (newIndex < 0) {
+            newIndex = currentBackgrounds.length - 1;
+        }
+        currentIndex = newIndex;
+
+        // Определяем, какой div сейчас скрыт, а какой виден
+        const hiddenElement = (activeBgElement === bg1) ? bg2 : bg1;
+
+        // Устанавливаем новую картинку на скрытый div
+        hiddenElement.style.backgroundImage = `url(${currentBackgrounds[currentIndex]})`;
+
+        // "Проявляем" новый фон и "скрываем" старый
+        hiddenElement.classList.add('active');
+        activeBgElement.classList.remove('active');
+
+        // Обновляем, какой div теперь активен
+        activeBgElement = hiddenElement;
+    }
+
+    // 4. Обработчики для стрелок
+    arrowLeft.addEventListener('click', () => {
+        if (currentBackgrounds.length <= 1) return;
+        changeBackground(currentIndex - 1);
+    });
+    arrowRight.addEventListener('click', () => {
+        if (currentBackgrounds.length <= 1) return;
+        changeBackground(currentIndex + 1);
+    });
 
     const profileButton = document.getElementById('profile-button');
     const profileModal = document.getElementById('profile-modal');
@@ -107,6 +160,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const armorSlotsContainer = document.getElementById('armor-slots');
     const inventoryMainContainer = document.getElementById('inventory-main');
     const inventoryHotbarContainer = document.getElementById('inventory-hotbar');
+
+
 
     let skinViewer;
     function switchTab(tabName) {
@@ -282,18 +337,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     statsGeneralList.appendChild(li);
                 }
             }
-            
+
             nicknameText.textContent = data.name;
             const loc = data.location;
             const mapUrl = formatMapUrl(loc);
             const worldName = loc.world.replace('minecraft:', '').replace('deeperdarker:', '');
-            infoCoords.innerHTML = ''; 
+            infoCoords.innerHTML = '';
             const link = document.createElement('a');
             link.href = '#'; // Используем #, чтобы страница не перезагружалась
             link.id = 'coords-link';
             link.title = 'Открыть на веб-карте';
             link.textContent = `X: ${loc.x} Y: ${loc.y} Z: ${loc.z} (${worldName})`;
-            
+
             link.addEventListener('click', (e) => {
                 e.preventDefault(); // Предотвращаем переход по ссылке
                 window.api.openMapWindow(mapUrl);
@@ -301,16 +356,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             infoCoords.appendChild(link);
             infoStatsShort.innerHTML = `Здоровье: <span style="font-size: 14px;color: rgb(253,19,20);">${data.health || 'N/A'}</span> / Еда: <span style="font-size: 14px;color: rgb(164,113,58);">${data.food || 'N/A'}</span> / Уровень: <span style="font-size: 14px;color: rgb(130,184,90);">${data.xp_level || 'N/A'}</span>`;
-            healthBarImg.style.width = data.health*5+"%";
-            hungerBarImg.style.width = data.food*5+"%";
-            if (data.last_updated){
-                const date = new Date(data.last_updated);  
+            healthBarImg.style.width = data.health * 5 + "%";
+            hungerBarImg.style.width = data.food * 5 + "%";
+            if (data.last_updated) {
+                const date = new Date(data.last_updated);
                 const localTimeString = date.toLocaleString();
                 lastUpdateStats.innerHTML = `<span style="font-size: 12px;color: #8B8B8B;">Последнее обновление:</span> ${localTimeString}`;
             } else {
                 lastUpdateStats.innerHTML = '';
             }
-            
+
             // Отрисовываем инвентарь
             renderSlots(armorSlotsContainer, data.armor.reverse(), 4); // reverse(), т.к. броня хранится от ног к голове
             renderSlots(inventoryMainContainer, data.inventory.slice(9, 36), 27); // Основные 27 слотов
@@ -441,10 +496,10 @@ document.addEventListener('DOMContentLoaded', () => {
         window.api.closeWindow();
     });
     serverLogoContainer.addEventListener('mouseenter', () => {
-        backgroundImage.classList.add('zoomed');
+        activeBgElement.classList.add('zoomed');
     });
     serverLogoContainer.addEventListener('mouseleave', () => {
-        backgroundImage.classList.remove('zoomed');
+        activeBgElement.classList.remove('zoomed');
     });
     function showView(viewName) {
         loginView.classList.add('hidden');
@@ -646,17 +701,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Динамический фон ---
     function updateBackground() {
         const hour = new Date().getHours();
-        // С 6 утра до 7 вечера - день
-        if (hour >= 7 && hour < 21) {
-            backgroundImage.classList.add('day');
-            backgroundImage.classList.remove('night');
-        } else {
-            backgroundImage.classList.add('night');
-            backgroundImage.classList.remove('day');
+        const isDay = (hour >= 7 && hour < 21);
+
+        const previousBackgrounds = currentBackgrounds;
+        currentBackgrounds = isDay ? dayBackgrounds : nightBackgrounds;
+
+        // Если тема сменилась (был день, стала ночь), или это первый запуск,
+        // то устанавливаем фон.
+        if (previousBackgrounds !== currentBackgrounds) {
+            // Устанавливаем фон с текущим индексом, но уже из новой темы
+            changeBackground(currentIndex);
         }
     }
-    updateBackground(); // Первый запуск
-    setInterval(updateBackground, 60000); // Проверяем каждую минуту
+
+    updateBackground(); // Первый запуск для установки начального фона
+    setInterval(updateBackground, 60000);
 
     // --- Загрузка сохраненных настроек ---
     window.api.getStoreValue('nickname').then(value => {
